@@ -33,7 +33,7 @@ export default function DashboardPage() {
           setData(res.data.data);
         }
       } catch (err) {
-        console.error('Failed to load dashboard:', err);
+        // silent fail
       }
       setLoading(false);
     };
@@ -67,7 +67,7 @@ export default function DashboardPage() {
           }
         }
       } catch (err) {
-        console.error('Failed to update avatar:', err);
+        // silent fail
         alert('Failed to update profile photo.');
       }
       setIsUploading(false);
@@ -87,7 +87,7 @@ export default function DashboardPage() {
         setUser(profileRes.data.data);
       }
     } catch (err) {
-      console.error('Failed to update name:', err);
+      // silent fail
       alert('Failed to update name.');
     }
     setIsEditingName(false);

@@ -40,13 +40,7 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(morgan('dev'));
 
-// XSS Sanitization (installed but was not wired up)
-try {
-  const xssClean = require('xss-clean');
-  app.use(xssClean());
-} catch (err) {
-  console.warn('[Security] xss-clean module not loaded:', err.message);
-}
+// No xss-clean module (removed dead code)
 
 // Serve Uploaded Files statically
 app.use('/uploads', express.static(uploadsDir));

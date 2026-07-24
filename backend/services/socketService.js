@@ -10,18 +10,14 @@ const initSocket = (server) => {
   });
 
   io.on('connection', (socket) => {
-    console.log(`[Socket.io] Client connected: ${socket.id}`);
-
     // Join user room for targeted notifications
     socket.on('join_user_room', (userId) => {
       socket.join(`user_${userId}`);
-      console.log(`[Socket.io] User ${userId} joined personal room`);
     });
 
     // Join question room for live answer updates
     socket.on('join_question_room', (questionId) => {
       socket.join(`question_${questionId}`);
-      console.log(`[Socket.io] Socket ${socket.id} joined question_${questionId}`);
     });
 
     socket.on('leave_question_room', (questionId) => {
@@ -29,7 +25,6 @@ const initSocket = (server) => {
     });
 
     socket.on('disconnect', () => {
-      console.log(`[Socket.io] Client disconnected: ${socket.id}`);
     });
   });
 

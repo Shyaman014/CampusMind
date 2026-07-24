@@ -36,12 +36,6 @@ const callLLM = async (messages) => {
 const streamAIResponse = async (promptText, onChunk, conversationHistory = []) => {
   const userQuery = promptText ? promptText.trim() : '';
   
-  console.log('[DEBUG] Final prompt sent to Groq:', userQuery);
-  
-  if (!userQuery) {
-    console.warn('[DEBUG] WARNING: userQuery is empty right before sending to Groq!');
-  }
-  
   if (!openai) {
     onChunk('⚠️ **AI service is not configured.** Please add a valid `GROQ_API_KEY` to the backend `.env` file and restart the server.');
     return;

@@ -12,7 +12,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, msg: '' }; }
   static getDerivedStateFromError(error) { return { hasError: true, msg: error.toString() }; }
-  componentDidCatch(error, info) { console.error('Render error:', error, info); }
+  componentDidCatch(error, info) { /* handled by ui */ }
   render() {
     if (this.state.hasError) return <div className="text-red-400 bg-red-400/10 p-3 rounded-lg text-xs">Render error: {this.state.msg}</div>;
     return this.props.children;
@@ -78,7 +78,7 @@ export default function ChatGPTView() {
     try {
       const res = await API.get('/chats');
       if (res.data.success) setChats(res.data.data);
-    } catch (err) { console.error('Failed to load chats:', err); }
+    } catch (err) { /* silent fail */ }
   };
 
   useEffect(() => { fetchChats(); }, []);
@@ -89,7 +89,7 @@ export default function ChatGPTView() {
     try {
       const res = await API.get(`/chats/${chatId}`);
       if (res.data.success) setMessages(res.data.data.messages || []);
-    } catch (err) { console.error('Failed to load chat:', err); }
+    } catch (err) { /* silent fail */ }
   };
 
   const handleNewChat = () => { setActiveChatId(null); setMessages([]); setStreamingContent(''); };
@@ -101,12 +101,12 @@ export default function ChatGPTView() {
 
   const handleDeleteChat = async (chatId) => {
     try { await API.delete(`/chats/${chatId}`); setChats(chats.filter(c => c._id !== chatId)); if (activeChatId === chatId) handleNewChat(); }
-    catch (err) { console.error('Failed to delete chat:', err); }
+    catch (err) { /* silent fail */ }
   };
 
   const handleClearAllChats = async () => {
     try { for (const chat of chats) await API.delete(`/chats/${chat._id}`); setChats([]); handleNewChat(); }
-    catch (err) { console.error('Failed to clear chats:', err); }
+    catch (err) { /* silent fail */ }
   };
 
   const handleSendMessage = async (promptText, attachments) => {
@@ -119,7 +119,7 @@ export default function ChatGPTView() {
   const streamResponseToBackend = async (promptText, attachments) => {
     const token = localStorage.getItem('campusmind_token');
     try {
-      const response = await fetch('/api/chats/stream', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
         body: JSON.stringify({ chatId: isTemporary ? null : activeChatId, message: promptText, attachments }),
@@ -220,18 +220,16 @@ export default function ChatGPTView() {
                 const isUser = msg.role === 'user';
                 return (
                   <div key={idx} className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''} animate-fade-in`}>
-                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      isUser ? 'bg-[#2A2A2A]' : 'bg-[#181818] border border-[#2A2A2A]'
-                    }`}>
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${isUser ? 'bg-[#2A2A2A]' : 'bg-[#181818] border border-[#2A2A2A]'
+                      }`}>
                       {isUser ? <UserIcon className="w-4 h-4 text-[#A1A1AA]" /> : <CampusMindIcon size={18} />}
                     </div>
 
                     <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[80%] min-w-0`}>
-                      <div className={`px-4 py-3 rounded-2xl ${
-                        isUser
+                      <div className={`px-4 py-3 rounded-2xl ${isUser
                           ? 'bg-[#1F1F1F] text-white rounded-tr-md border border-[#2A2A2A]'
                           : 'bg-[#181818] text-white rounded-tl-md border border-[#2A2A2A]'
-                      }`}>
+                        }`}>
                         {msg.attachments?.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mb-2">
                             {msg.attachments.map((att, aIdx) => (

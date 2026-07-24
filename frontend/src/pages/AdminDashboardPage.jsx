@@ -27,7 +27,7 @@ export default function AdminDashboardPage() {
       if (statsRes.data.success) setStats(statsRes.data.data);
       if (usersRes.data.success) setUsers(usersRes.data.data);
     } catch (err) {
-      console.error('Failed to fetch admin data:', err);
+      // silent fail
     }
     setLoading(false);
   };
@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
         fetchAdminData();
       }
     } catch (err) {
-      console.error('Role update failed:', err);
+      // silent fail
     }
   };
 
@@ -55,7 +55,7 @@ export default function AdminDashboardPage() {
         fetchAdminData();
       }
     } catch (err) {
-      console.error('Delete question failed:', err);
+      // silent fail
     }
   };
 
@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
         fetchAdminData();
       }
     } catch (err) {
-      console.error('Delete user failed:', err);
+      // silent fail
     }
   };
 

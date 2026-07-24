@@ -8,7 +8,7 @@ const connectDB = async () => {
     });
     console.log(`[MongoDB] Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.warn(`[MongoDB Warning] Could not connect to database (${error.message}). Running in mock/fallback mode for development/testing.`);
+    console.error("MongoDB Error:", error);
   }
 };
 

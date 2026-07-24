@@ -68,14 +68,7 @@ const deleteChat = async (req, res, next) => {
  */
 const streamChatMessage = async (req, res, next) => {
   try {
-    console.log('[DEBUG] Incoming /api/chats/stream request');
-    console.log('[DEBUG] req.body:', JSON.stringify(req.body, null, 2));
-
     const { chatId, message, attachments } = req.body;
-    
-    if (!message || message.trim() === '') {
-      console.warn('[DEBUG] WARNING: req.body.message is empty or undefined!');
-    }
 
     const userId = req.user._id || req.user.id || '65f1a2b3c4d5e6f7a8b9c0d1';
 
