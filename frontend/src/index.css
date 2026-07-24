@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0B0B0B] text-white antialiased overflow-x-hidden;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  ::selection {
+    background: #FFFFFF;
+    color: #0B0B0B;
+  }
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #3A3A3A; }
+
+textarea { resize: none; }
+textarea::-webkit-scrollbar { width: 4px; }
+
+.markdown-body { font-family: inherit; color: inherit; line-height: 1.75; }
+.markdown-body p { margin-bottom: 0.6em; }
+.markdown-body p:last-child { margin-bottom: 0; }
+
+.markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.6em; }
+.markdown-body ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 0.6em; }
+.markdown-body li { margin-bottom: 0.2em; }
+
+.markdown-body a { color: #D4D4D8; text-decoration: underline; text-underline-offset: 2px; }
+.markdown-body a:hover { color: #FFFFFF; }
+
+.markdown-body strong { font-weight: 600; color: #FFFFFF; }
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+  font-weight: 700; margin-top: 1.2em; margin-bottom: 0.4em; color: #FFFFFF;
+}
+.markdown-body h1 { font-size: 1.35em; }
+.markdown-body h2 { font-size: 1.15em; }
+.markdown-body h3 { font-size: 1.05em; }
+
+.markdown-body blockquote {
+  border-left: 2px solid #2A2A2A;
+  padding-left: 1em;
+  margin: 0.75em 0;
+  color: #A1A1AA;
+}
+
+.markdown-body table { width: 100%; border-collapse: collapse; margin: 0.75em 0; }
+.markdown-body th, .markdown-body td {
+  border: 1px solid #2A2A2A; padding: 0.45em 0.7em; text-align: left; font-size: 0.88em;
+}
+.markdown-body th { background: #181818; font-weight: 600; }
+.markdown-body td { background: #111111; }
+
+.markdown-body hr { border: none; border-top: 1px solid #2A2A2A; margin: 1em 0; }
+
+.smooth-transition { transition: all 0.15s ease-in-out; }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-fade-in { animation: fade-in 0.25s ease-out; }
+
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+.typing-cursor {
+  display: inline-block; width: 6px; height: 1em;
+  background: #FFFFFF; vertical-align: middle; margin-left: 3px;
+  animation: blink 1s step-end infinite;
+}
