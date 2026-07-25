@@ -54,13 +54,13 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 pb-4">
+    <div className="w-full max-w-3xl mx-auto px-2 sm:px-4 pb-3 sm:pb-4">
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-2">
           {attachments.map((att, idx) => (
             <div key={idx} className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-[#181818] border border-[#2A2A2A] text-xs text-white">
               <FileText className="w-3.5 h-3.5 text-[#A1A1AA]" />
-              <span className="truncate max-w-[160px]">{att.fileName}</span>
+              <span className="truncate max-w-[120px] sm:max-w-[160px]">{att.fileName}</span>
               <button type="button" onClick={() => removeAttachment(idx)} className="p-0.5 rounded hover:bg-[#2A2A2A] text-[#A1A1AA] hover:text-white smooth-transition">
                 <X className="w-3 h-3" />
               </button>
@@ -80,7 +80,7 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
         <input type="file" ref={fileInputRef} onChange={handleFileSelected} accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.docx" className="hidden" />
 
         <button type="button" onClick={handlePlusClick} disabled={uploading || disabled}
-          className="p-2.5 ml-1 text-[#A1A1AA] hover:text-white smooth-transition flex-shrink-0">
+          className="p-2 sm:p-2.5 ml-1 text-[#A1A1AA] hover:text-white smooth-transition flex-shrink-0">
           {uploading ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Paperclip className="w-[18px] h-[18px]" />}
         </button>
 
@@ -90,7 +90,7 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={isTemporary ? 'Message (temporary)…' : 'Message CampusMind AI…'}
-          className="flex-1 bg-transparent text-[14px] text-white placeholder-[#A1A1AA]/60 py-2.5 px-1 focus:outline-none resize-none leading-normal max-h-[150px]"
+          className="flex-1 min-w-0 bg-transparent text-[13px] sm:text-[14px] text-white placeholder-[#A1A1AA]/60 py-2 sm:py-2.5 px-1 sm:px-1.5 focus:outline-none resize-none leading-normal max-h-[150px]"
           rows={1}
         />
 

@@ -142,14 +142,14 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="flex items-center space-x-4 w-full md:w-auto">
-          <div className="flex-1 md:flex-none px-6 py-4 rounded-xl bg-[#1F1F1F] border border-[#2A2A2A] text-center min-w-[120px]">
+        <div className="flex items-center gap-2 sm:gap-4 w-full md:w-auto">
+          <div className="flex-1 md:flex-none px-3 sm:px-6 py-4 rounded-xl bg-[#1F1F1F] border border-[#2A2A2A] text-center min-w-[100px] sm:min-w-[120px]">
             <span className="text-2xl font-semibold text-[#22C55E] block">{analytics?.reputation || 10}</span>
             <span className="text-[10px] font-medium text-[#A1A1AA] uppercase tracking-wider mt-1 block">Reputation</span>
           </div>
-          <div className="flex-1 md:flex-none px-6 py-4 rounded-xl bg-[#1F1F1F] border border-[#2A2A2A] text-center min-w-[120px]">
-            <div className="flex items-center justify-center space-x-1.5 text-2xl font-semibold text-[#F59E0B]">
-              <Flame className="w-5 h-5 fill-[#F59E0B]" />
+          <div className="flex-1 md:flex-none px-3 sm:px-6 py-4 rounded-xl bg-[#1F1F1F] border border-[#2A2A2A] text-center min-w-[100px] sm:min-w-[120px]">
+            <div className="flex items-center justify-center space-x-1 sm:space-x-1.5 text-xl sm:text-2xl font-semibold text-[#F59E0B]">
+              <Flame className="w-4 h-4 sm:w-5 sm:h-5 fill-[#F59E0B]" />
               <span>{analytics?.streakDays || 1}d</span>
             </div>
             <span className="text-[10px] font-medium text-[#A1A1AA] uppercase tracking-wider mt-1 block">Streak</span>

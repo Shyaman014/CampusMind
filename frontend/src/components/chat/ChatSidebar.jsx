@@ -14,8 +14,10 @@ export default function ChatSidebar({
 }) {
   return (
     <aside
-      className={`w-[260px] bg-[#111111] flex flex-col h-full transition-all duration-200 z-20 border-r border-[#2A2A2A]/40 ${
-        isOpen ? 'block' : 'hidden md:flex'
+      className={`bg-[#111111] flex flex-col h-full transition-all duration-200 border-r border-[#2A2A2A]/40 ${
+        isOpen
+          ? 'fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] shadow-2xl block md:relative md:w-[260px] md:shadow-none'
+          : 'hidden md:flex md:relative md:w-[260px]'
       }`}
     >
       <div className="p-4 pt-5 space-y-3">

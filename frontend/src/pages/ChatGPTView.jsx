@@ -85,17 +85,17 @@ export default function ChatGPTView() {
   useEffect(() => { scrollToBottom(); }, [messages, streamingContent]);
 
   const handleSelectChat = async (chatId) => {
-    setIsTemporary(false); setActiveChatId(chatId); setStreamingContent('');
+    setIsTemporary(false); setActiveChatId(chatId); setStreamingContent(''); setSidebarOpen(false);
     try {
       const res = await API.get(`/chats/${chatId}`);
       if (res.data.success) setMessages(res.data.data.messages || []);
     } catch (err) { /* silent fail */ }
   };
 
-  const handleNewChat = () => { setActiveChatId(null); setMessages([]); setStreamingContent(''); };
+  const handleNewChat = () => { setActiveChatId(null); setMessages([]); setStreamingContent(''); setSidebarOpen(false); };
 
   const handleToggleTemporary = () => {
-    const next = !isTemporary; setIsTemporary(next);
+    const next = !isTemporary; setIsTemporary(next); setSidebarOpen(false);
     if (next) { setActiveChatId(null); setMessages([]); }
   };
 
@@ -168,21 +168,28 @@ export default function ChatGPTView() {
   const copyToClipboard = (text) => navigator.clipboard.writeText(text);
 
   return (
-    <div className="flex h-[calc(100vh-48px)] overflow-hidden bg-[#0B0B0B] text-white">
+    <div className="flex h-[calc(100vh-48px)] h-[calc(100dvh-48px)] overflow-hidden bg-[#0B0B0B] text-white">
       <ChatSidebar
         chats={chats} activeChatId={activeChatId} onSelectChat={handleSelectChat}
         onNewChat={handleNewChat} onDeleteChat={handleDeleteChat} onClearAllChats={handleClearAllChats}
         isTemporary={isTemporary} onToggleTemporary={handleToggleTemporary} isOpen={sidebarOpen}
       />
 
-      <div className="flex-1 flex flex-col h-full relative">
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/60 z-40 md:hidden animate-fade-in"
+        />
+      )}
+
+      <div className="flex-1 flex flex-col h-full relative min-w-0">
         <div className="px-3 py-2 border-b border-[#2A2A2A]/40 flex items-center justify-between md:hidden bg-[#111111]">
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg text-[#A1A1AA] hover:text-white">
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center space-x-1.5">
+          <div className="flex items-center space-x-1.5 min-w-0">
             <CampusMindIcon size={20} />
-            <span className="text-sm font-medium">CampusMind AI</span>
+            <span className="text-sm font-medium truncate">CampusMind AI</span>
           </div>
           <button onClick={handleNewChat} className="p-1.5 rounded-lg text-[#A1A1AA] hover:text-white">
             <Edit2 className="w-4 h-4" />
@@ -198,7 +205,7 @@ export default function ChatGPTView() {
                 <p className="text-[#A1A1AA] text-sm tracking-wide">What can I help you learn today?</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg px-2 sm:px-0">
                 {[
                   'Explain QuickSort time complexity & code',
                   'Summarize OS paging vs segmentation',
@@ -226,7 +233,7 @@ export default function ChatGPTView() {
                       {isUser ? <UserIcon className="w-4 h-4 text-[#A1A1AA]" /> : <CampusMindIcon size={18} />}
                     </div>
 
-                    <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[80%] min-w-0`}>
+                    <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[88%] sm:max-w-[80%] min-w-0`}>
                       <div className={`px-4 py-3 rounded-2xl ${isUser
                           ? 'bg-[#1F1F1F] text-white rounded-tr-md border border-[#2A2A2A]'
                           : 'bg-[#181818] text-white rounded-tl-md border border-[#2A2A2A]'
@@ -243,7 +250,7 @@ export default function ChatGPTView() {
                         )}
 
                         {editingIndex === idx ? (
-                          <div className="flex flex-col space-y-2 min-w-[280px]">
+                          <div className="flex flex-col space-y-2 w-full min-w-[200px] sm:min-w-[280px]">
                             <textarea value={editValue} onChange={e => setEditValue(e.target.value)}
                               className="w-full bg-[#111111] text-white border border-[#2A2A2A] rounded-lg p-2.5 text-sm focus:outline-none focus:border-[#3A3A3A] resize-none" rows={3} />
                             <div className="flex justify-end space-x-2">
@@ -303,7 +310,7 @@ export default function ChatGPTView() {
                   <div className="w-7 h-7 rounded-lg bg-[#181818] border border-[#2A2A2A] flex items-center justify-center flex-shrink-0">
                     <CampusMindIcon size={18} animate />
                   </div>
-                  <div className="px-4 py-3 rounded-2xl bg-[#181818] text-white rounded-tl-md border border-[#2A2A2A] max-w-[80%]">
+                  <div className="px-4 py-3 rounded-2xl bg-[#181818] text-white rounded-tl-md border border-[#2A2A2A] max-w-[88%] sm:max-w-[80%]">
                     <div className="text-[14px] leading-relaxed">
                       <ErrorBoundary>
                         <div className="markdown-body">

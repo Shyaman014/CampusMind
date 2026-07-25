@@ -16,9 +16,9 @@ export default function Navbar() {
       <div className="max-w-full mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-12">
 
-          <Link to="/" className="flex items-center space-x-2.5 group">
+          <Link to="/" className="flex items-center space-x-2 sm:space-x-2.5 group min-w-0">
             <CampusMindIcon size={26} />
-            <span className="text-[15px] font-semibold tracking-tight text-white">
+            <span className="text-[14px] sm:text-[15px] font-semibold tracking-tight text-white truncate max-w-[150px] sm:max-w-none">
               CampusMind AI
             </span>
           </Link>
@@ -38,7 +38,7 @@ export default function Navbar() {
                   </button>
 
                   {showNotifications && (
-                    <div className="absolute right-0 mt-1 w-72 bg-[#181818] rounded-xl shadow-2xl border border-[#2A2A2A] overflow-hidden z-50 animate-fade-in">
+                    <div className="absolute right-0 mt-1 w-72 max-w-[calc(100vw-32px)] bg-[#181818] rounded-xl shadow-2xl border border-[#2A2A2A] overflow-hidden z-50 animate-fade-in">
                       <div className="px-4 py-2.5 border-b border-[#2A2A2A]">
                         <span className="text-[11px] font-medium text-[#A1A1AA] uppercase tracking-wider">Notifications</span>
                       </div>
@@ -77,7 +77,7 @@ export default function Navbar() {
                   </button>
 
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-1 w-52 bg-[#181818] rounded-xl shadow-2xl border border-[#2A2A2A] overflow-hidden z-50 animate-fade-in">
+                    <div className="absolute right-0 mt-1 w-52 max-w-[calc(100vw-32px)] bg-[#181818] rounded-xl shadow-2xl border border-[#2A2A2A] overflow-hidden z-50 animate-fade-in">
                       <div className="px-4 py-3 border-b border-[#2A2A2A]">
                         <p className="text-sm font-medium text-white truncate">{user.name}</p>
                         <p className="text-xs text-[#A1A1AA] capitalize">{user.role}</p>

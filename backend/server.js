@@ -71,6 +71,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Mount Routes
+app.use('/auth', require('./routes/authRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/chats', require('./routes/chatRoutes'));
 app.use('/api/questions', require('./routes/questionRoutes'));
