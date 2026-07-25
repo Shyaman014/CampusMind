@@ -31,7 +31,7 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype) || allowedExts.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Allowed: PDF, DOCX, TXT, MD, PPT, JPG, PNG, WEBP.'), false);
+    cb(new Error('Unsupported file type. Allowed: PDF, Word, PPT, Text, and Images.'), false);
   }
 };
 

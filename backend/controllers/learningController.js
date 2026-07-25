@@ -32,7 +32,8 @@ exports.uploadMaterial = async (req, res) => {
     try {
       extractedText = await extractTextFromAttachment({ fileName: req.file.originalname, fileUrl });
     } catch (err) {
-      console.warn('Text extraction warning in learningController:', err.message);
+      console.error('[Backend Upload Error - Text Extraction]:', err.message, err.stack);
+      return errorResponse(res, 400, err.message || 'PDF extraction failed.');
     }
 
     // Invoke Gemini AI to extract key insights, flashcards, quiz, summary, and 4-tier notes
@@ -51,7 +52,7 @@ exports.uploadMaterial = async (req, res) => {
     });
 
     const responseData = upload.toObject ? upload.toObject() : { ...upload._doc };
-    responseData.extractedText = extractedText || aiAnalysis.summary || `[Uploaded: ${req.file.originalname}]`;
+    responseData.extractedText = extractedText;
 
     return successResponse(res, 201, 'File uploaded and AI analysis complete', responseData);
   } catch (error) {

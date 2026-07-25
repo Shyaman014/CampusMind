@@ -187,17 +187,18 @@ const streamChatMessage = async (req, res, next) => {
     if (attachments && attachments.length > 0) {
       for (const att of attachments) {
         try {
-          let text = att.extractedText || att.summary || '';
-          if (!text) {
+          let text = att.extractedText;
+          if (!text || typeof text !== 'string' || text.trim().length < 10 || text.startsWith('[') || text.startsWith('Document "')) {
             text = await extractTextFromAttachment(att);
           }
-          extractedText += `\n--- Document: ${att.fileName} ---\n${text}\n--- End Document ---\n`;
-          enrichedAttachments.push({ ...att, extractedText: text });
+          if (!text || text.trim() === '') {
+            throw new Error(`No readable text could be extracted from "${att.fileName}".`);
+          }
+          extractedText += `\n--- Document: ${att.fileName} ---\n${text.trim()}\n--- End Document ---\n`;
+          enrichedAttachments.push({ ...att, extractedText: text.trim() });
         } catch (error) {
-          console.warn(`[Attachment Extraction Warning] Fallback for ${att.fileName}:`, error.message);
-          const fallbackText = att.extractedText || att.summary || `[Attachment: ${att.fileName || 'document'}]`;
-          extractedText += `\n--- Document: ${att.fileName} ---\n${fallbackText}\n--- End Document ---\n`;
-          enrichedAttachments.push({ ...att, extractedText: fallbackText });
+          console.error(`[Backend Chat Streaming Error - Extraction]:`, error.message, error.stack);
+          return res.status(400).json({ success: false, message: error.message || 'File extraction failed.' });
         }
       }
     }
@@ -222,10 +223,22 @@ const streamChatMessage = async (req, res, next) => {
       chat.messages = chat.messages.slice(0, sliceIndex);
     }
 
-    const conversationHistory = chat.messages.slice(-10).map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
+    const conversationHistory = chat.messages.slice(-10).map((m) => {
+      let contentStr = m.content || '';
+      if (m.attachments && m.attachments.length > 0) {
+        const attSummary = m.attachments
+          .filter(a => a && a.fileName)
+          .map(a => `[Attached ${a.fileType && a.fileType.includes('image') ? 'Image' : 'Document'}: "${a.fileName}"]\nExtracted Content:\n${a.extractedText || 'No readable text'}`)
+          .join('\n\n');
+        if (attSummary) {
+          contentStr = contentStr ? `${contentStr}\n\n${attSummary}` : attSummary;
+        }
+      }
+      return {
+        role: m.role,
+        content: contentStr,
+      };
+    });
 
     chat.messages.push({
       role: 'user',
@@ -250,7 +263,23 @@ const streamChatMessage = async (req, res, next) => {
     let promptText = message || '';
     if (extractedText) {
       const userQ = message ? `User Question:\n"${message}"\n\n` : '';
-      promptText = `${userQ}Attached Document:\n${extractedText}\n\nInstructions:\nPlease analyze, summarize, and explain the key points of the attached document in detail. Answer using the document content when possible.`;
+      promptText = `${userQ}Attached Document Content:\n${extractedText}\n\nInstructions:\nPlease answer the user question or analyze the attached document in detail. Answer using the document content when possible.`;
+    } else if (chat && chat.messages && chat.messages.length > 0) {
+      const pastAttachments = [];
+      for (const m of chat.messages) {
+        if (m.attachments && m.attachments.length > 0) {
+          for (const att of m.attachments) {
+            if (att && att.extractedText && att.extractedText.trim() !== '' && !att.extractedText.startsWith('[')) {
+              pastAttachments.push(`[Previously Attached ${att.fileType && att.fileType.includes('image') ? 'Image' : 'Document'} in message "${m.content ? m.content.slice(0, 30) : 'upload'}": "${att.fileName}"]\nContent:\n${att.extractedText}`);
+            }
+          }
+        }
+      }
+      if (pastAttachments.length > 0) {
+        const contextStr = pastAttachments.join('\n\n--- Next Attachment ---\n\n');
+        const userQ = message ? `User Follow-up Question:\n"${message}"\n\n` : '';
+        promptText = `${userQ}Active Conversation Context (Previously Uploaded Files):\n${contextStr}\n\nInstructions:\nAnswer the user's follow-up question using the active conversation context and previously uploaded document/image content above without asking them to re-upload the file.`;
+      }
     }
     if (!promptText || promptText.trim() === '') {
       promptText = 'Please review the uploaded material and assist me.';

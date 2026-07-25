@@ -32,8 +32,8 @@ const errorHandler = (err, req, res, next) => {
   }
 
   // Multer error or multipart parser boundary error
-  if (err.name === 'MulterError' || (err.message && (err.message.includes('Multipart') || err.message.includes('boundary') || err.message.includes('Invalid file type') || err.message.includes('Unexpected end of form')))) {
-    const message = `Upload Error (${err.name || 'MulterError'}): ${err.message}`;
+  if (err.name === 'MulterError' || (err.message && (err.message.includes('Multipart') || err.message.includes('boundary') || err.message.includes('Invalid file type') || err.message.includes('Unsupported file type') || err.message.includes('Unexpected end of form')))) {
+    const message = err.message || 'Upload failed.';
     console.error(`[HTTP 400 Upload Error] ${message}`, err);
     return errorResponse(res, 400, message);
   }

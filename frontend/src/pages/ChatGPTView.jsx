@@ -179,7 +179,16 @@ export default function ChatGPTView() {
         headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
         body: JSON.stringify({ chatId: isTemporary ? null : activeChatId, message: promptText, attachments, sliceIndex, mode: 'general' }),
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        let errMsg = `HTTP ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData && errData.message) {
+            errMsg = errData.message;
+          }
+        } catch { }
+        throw new Error(errMsg);
+      }
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let currentAIContent = '', sseBuffer = '';
