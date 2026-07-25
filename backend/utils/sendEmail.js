@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const getVerificationEmailHtml = (name, verifyUrl) => `
 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #111111; color: #ffffff; padding: 40px; border-radius: 12px; border: 1px solid #27272a;">
@@ -58,32 +58,40 @@ const getWelcomeEmailHtml = (name, clientUrl) => `
 `;
 
 const sendEmail = async (options) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
-    port: process.env.SMTP_PORT || 2525,
-    auth: {
-      user: process.env.SMTP_USER || process.env.SMTP_EMAIL || 'test_user',
-      pass: process.env.SMTP_PASS || process.env.SMTP_PASSWORD || 'test_pass',
-    },
-  });
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY environment variable is not set');
+  }
 
-  const fromEmail = process.env.EMAIL_FROM || process.env.FROM_EMAIL || 'noreply@campusmind.ai';
+  const resend = new Resend(apiKey);
+  const fromEmail = process.env.EMAIL_FROM || 'noreply@campusmind.ai';
+  const from = fromEmail.includes('<') && fromEmail.includes('>')
+    ? fromEmail
+    : `${process.env.FROM_NAME || 'CampusMind AI'} <${fromEmail}>`;
 
   const message = {
-    from: `${process.env.FROM_NAME || 'CampusMind AI'} <${fromEmail}>`,
+    from,
     to: options.email,
     subject: options.subject,
-    text: options.message,
-    html: options.html || `<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;"><h2>${options.subject}</h2><p>${options.message}</p></div>`,
+    text: options.message || options.text || '',
+    html: options.html || `<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;"><h2>${options.subject}</h2><p>${options.message || options.text || ''}</p></div>`,
   };
 
   try {
-    const info = await transporter.sendMail(message);
-    console.log(`[Email Sent] ID: ${info.messageId}`);
-    return info;
+    const { data, error } = await resend.emails.send(message);
+
+    if (error) {
+      console.error('[Email Error] Failed to send email via Resend:', error);
+      const err = new Error(error.message || 'Email sending failed via Resend');
+      err.error = error;
+      throw err;
+    }
+
+    console.log(`[Email Sent] ID: ${data ? data.id : 'unknown'}`);
+    return data;
   } catch (error) {
-    console.warn(`[Email Warning] Could not send email via SMTP (${error.message}). Simulating email send.`);
-    return { messageId: 'simulated-id-123' };
+    console.error('[Email Error] Could not send email:', error.message || error);
+    throw error;
   }
 };
 
