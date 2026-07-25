@@ -11,20 +11,20 @@ export default function CampusMindIcon({ size = 32, className = '', animate = fa
       className={className}
       aria-label="CampusMind AI"
     >
-      {/* The Open Knowledge Loop (Stunning geometric open ring) */}
-      <path
-        d="M 27 16 A 11 11 0 1 1 16 5"
-        stroke="currentColor"
-        strokeWidth="6"
-        strokeLinecap="round"
+      {/* The Open Knowledge Loop */}
+      <path 
+        fillRule="evenodd" 
+        clipRule="evenodd" 
+        d="M16 2 A 14 14 0 1 0 30 16 H 22 A 6 6 0 1 1 16 10 V 2 Z" 
+        fill="currentColor" 
       />
-      {/* The AI Spark (Solid circle dot in upper right notch) */}
-      <circle
-        cx="23.5"
-        cy="8.5"
-        r="3.8"
-        fill="currentColor"
-        className={animate ? 'animate-pulse origin-center' : ''}
+      {/* The AI Spark (Node) */}
+      <circle 
+        cx="23" 
+        cy="9" 
+        r="4" 
+        fill="currentColor" 
+        className={animate ? 'animate-pulse origin-center' : ''} 
         style={{ animationDuration: '1.5s' }}
       />
     </svg>
