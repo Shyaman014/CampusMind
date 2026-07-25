@@ -5,8 +5,7 @@ import {
   CheckCircle, 
   MessageSquare, 
   Send,
-  Award,
-  User as UserIcon
+  Award
 } from 'lucide-react';
 import API from '../../services/api';
 import { useAuth } from '../../context/AuthContext';

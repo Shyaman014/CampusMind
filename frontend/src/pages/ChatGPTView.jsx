@@ -3,27 +3,25 @@ import API, { API_BASE_URL } from '../services/api';
 import ChatSidebar from '../components/chat/ChatSidebar';
 import ChatInputBar from '../components/chat/ChatInputBar';
 import { Copy, Check, FileText, Menu, ThumbsUp, ThumbsDown, Edit2, RotateCcw, Download, ChevronLeft, ChevronRight } from 'lucide-react';
-import CampusMindIcon from '../components/ui/CampusMindIcon';
 import BrandLogo from '../components/ui/BrandLogo';
 import UserAvatar from '../components/ui/UserAvatar';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, msg: '' }; }
   static getDerivedStateFromError(error) { return { hasError: true, msg: error.toString() }; }
-  componentDidCatch(error, info) { }
+  componentDidCatch(_error, _info) { }
   render() {
     if (this.state.hasError) return <div className="text-red-400 bg-red-400/10 p-3 rounded-lg text-xs">Render error: {this.state.msg}</div>;
     return this.props.children;
   }
 }
 
-const CodeBlock = ({ node, className, children }) => {
+const CodeBlock = ({ node: _node, className, children }) => {
   const [copied, setCopied] = useState(false);
   const match = /language-(\w+)/.exec(className || '');
   const isBlock = match || String(children).includes('\n');
@@ -79,7 +77,6 @@ export default function ChatGPTView() {
   const [copiedMsgIdx, setCopiedMsgIdx] = useState(null);
   const [versionIndices, setVersionIndices] = useState({});
   const messagesEndRef = useRef(null);
-  const navigate = useNavigate();
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 

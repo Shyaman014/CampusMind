@@ -4,7 +4,7 @@ import API from '../services/api';
 import QuestionCard from '../components/questions/QuestionCard';
 import SkeletonLoader from '../components/common/SkeletonLoader';
 import Sidebar from '../components/layout/Sidebar';
-import { Sparkles, TrendingUp, Clock, Eye, Filter, PlusCircle, AlertCircle } from 'lucide-react';
+import { Sparkles, TrendingUp, Clock, Eye, PlusCircle, AlertCircle } from 'lucide-react';
 
 export default function HomePage() {
   const [questions, setQuestions] = useState([]);

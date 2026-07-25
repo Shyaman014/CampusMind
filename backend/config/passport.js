@@ -8,7 +8,7 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID_PLACEHO
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET_PLACEHOLDER';
 const googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback';
 
-if (googleClientId === 'GOOGLE_CLIENT_ID_PLACEHOLDER') {
+if (googleClientId === 'GOOGLE_CLIENT_ID_PLACEHOLDER' && process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
   console.warn('[Passport] WARNING: GOOGLE_CLIENT_ID not set. Google OAuth will use placeholder keys.');
 }
 
@@ -87,7 +87,7 @@ const facebookAppId = process.env.FACEBOOK_APP_ID || 'FACEBOOK_APP_ID_PLACEHOLDE
 const facebookAppSecret = process.env.FACEBOOK_APP_SECRET || 'FACEBOOK_APP_SECRET_PLACEHOLDER';
 const facebookCallbackUrl = process.env.FACEBOOK_CALLBACK_URL || '/api/auth/facebook/callback';
 
-if (facebookAppId === 'FACEBOOK_APP_ID_PLACEHOLDER') {
+if (facebookAppId === 'FACEBOOK_APP_ID_PLACEHOLDER' && process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
   console.warn('[Passport] WARNING: FACEBOOK_APP_ID not set. Facebook OAuth will use placeholder keys.');
 }
 

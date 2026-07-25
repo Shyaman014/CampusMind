@@ -3,7 +3,6 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../services/api';
 import { Mail, Lock, ArrowRight, Sparkles, Eye, EyeOff, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import CampusMindIcon from '../components/ui/CampusMindIcon';
 import BrandLogo from '../components/ui/BrandLogo';
 
 const GoogleIcon = () => (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API from '../services/api';
-import { Trophy, Award, Flame, Star, ShieldCheck, User } from 'lucide-react';
+import { Trophy, Flame } from 'lucide-react';
 
 export default function LeaderboardPage() {
   const [users, setUsers] = useState([]);

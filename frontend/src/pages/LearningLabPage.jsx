@@ -104,6 +104,10 @@ export default function LearningLabPage() {
       {/* File Upload Zone */}
       <FileUploadZone onUploadComplete={handleUploadSuccess} />
 
+      {loading && uploads.length === 0 && (
+        <div className="text-center py-8 text-slate-400 text-sm">Loading your study packs...</div>
+      )}
+
       {/* Main Material Viewer */}
       {uploads.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

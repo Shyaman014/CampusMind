@@ -47,7 +47,6 @@ export default function QuizComponent({ quiz }) {
 
       <div className="space-y-6">
         {quiz.map((q, qIdx) => {
-          const isCorrect = selectedAnswers[qIdx] === q.correctAnswer;
           return (
             <div key={qIdx} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-3">
               <h4 className="text-sm font-bold text-white flex items-start space-x-2">

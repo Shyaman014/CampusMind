@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import UserAvatar from '../components/ui/UserAvatar';
 import { 
   HelpCircle, 
   MessageSquare, 

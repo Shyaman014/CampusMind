@@ -1,8 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
-const Tesseract = require('tesseract.js');
 
 /**
  * Extracts text from a local file attachment.
@@ -28,6 +26,7 @@ const extractTextFromAttachment = async (attachment) => {
 
     // PDF File
     if (ext === '.pdf') {
+      const pdfParse = require('pdf-parse');
       const dataBuffer = fs.readFileSync(filePath);
       const data = await pdfParse(dataBuffer);
       return data.text;
@@ -54,6 +53,7 @@ const extractTextFromAttachment = async (attachment) => {
 
     // Images (OCR)
     if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.webp') {
+      const Tesseract = require('tesseract.js');
       const { data: { text } } = await Tesseract.recognize(filePath, 'eng');
       return text || `[Image OCR: ${attachment.fileName}]`;
     }

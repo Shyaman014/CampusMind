@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, HelpCircle, Layers, RefreshCw, Zap } from 'lucide-react';
+import { Sparkles, HelpCircle, RefreshCw, Zap } from 'lucide-react';
 import API from '../../services/api';
 
 export default function AIAnswerBox({ initialAnswer, questionTitle, questionContent }) {

@@ -16,4 +16,16 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', 'axios'],
+          ui: ['lucide-react', 'framer-motion', 'socket.io-client'],
+          markdown: ['react-markdown', 'remark-gfm', 'react-syntax-highlighter'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 });

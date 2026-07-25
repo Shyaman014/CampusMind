@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
-import { Sparkles, HelpCircle, Tag as TagIcon, BookOpen, EyeOff, Send, AlertCircle } from 'lucide-react';
+import { HelpCircle, Tag as TagIcon, BookOpen, EyeOff, Send, AlertCircle } from 'lucide-react';
 
 const SUBJECTS = [
   'General Computer Science',

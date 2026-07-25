@@ -5,9 +5,7 @@ import {
   MessageSquare, 
   Eye, 
   CheckCircle2, 
-  Sparkles, 
-  User as UserIcon,
-  Tag as TagIcon
+  Sparkles
 } from 'lucide-react';
 import API from '../../services/api';
 

@@ -5,8 +5,6 @@ import {
   Tag as TagIcon, 
   Sparkles, 
   CheckCircle2, 
-  Flame, 
-  TrendingUp, 
   Zap 
 } from 'lucide-react';
 

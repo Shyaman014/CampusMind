@@ -13,7 +13,9 @@ const seedDemoUsers = async () => {
         yearOfStudy: '3rd Year',
         isVerified: true
       });
-      console.log('[Seed] Demo Student created.');
+      if (process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
+        console.log('[Seed] Demo Student created.');
+      }
     }
 
     const adminExists = await User.findOne({ email: 'admin@campusmind.ai' });
@@ -27,7 +29,9 @@ const seedDemoUsers = async () => {
         yearOfStudy: 'Staff',
         isVerified: true
       });
-      console.log('[Seed] Demo Admin created.');
+      if (process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
+        console.log('[Seed] Demo Admin created.');
+      }
     }
 
     const guestExists = await User.findById('65f1a2b3c4d5e6f7a8b9c0d1');
@@ -42,10 +46,14 @@ const seedDemoUsers = async () => {
         yearOfStudy: 'Guest',
         isVerified: true
       });
-      console.log('[Seed] Guest Scholar created.');
+      if (process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
+        console.log('[Seed] Guest Scholar created.');
+      }
     }
   } catch (error) {
-    console.error('[Seed Error] Failed to seed demo users:', error.message);
+    if (process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
+      console.error('[Seed Error] Failed to seed demo users:', error.message);
+    }
   }
 };
 

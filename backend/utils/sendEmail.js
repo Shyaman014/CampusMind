@@ -81,16 +81,22 @@ const sendEmail = async (options) => {
     const { data, error } = await resend.emails.send(message);
 
     if (error) {
-      console.error('[Email Error] Failed to send email via Resend:', error);
+      if (process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
+        console.error('[Email Error] Failed to send email via Resend:', error);
+      }
       const err = new Error(error.message || 'Email sending failed via Resend');
       err.error = error;
       throw err;
     }
 
-    console.log(`[Email Sent] ID: ${data ? data.id : 'unknown'}`);
+    if (process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
+      console.log(`[Email Sent] ID: ${data ? data.id : 'unknown'}`);
+    }
     return data;
   } catch (error) {
-    console.error('[Email Error] Could not send email:', error.message || error);
+    if (process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
+      console.error('[Email Error] Could not send email:', error.message || error);
+    }
     throw error;
   }
 };

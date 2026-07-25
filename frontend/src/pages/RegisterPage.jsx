@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../services/api';
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
-import CampusMindIcon from '../components/ui/CampusMindIcon';
 import BrandLogo from '../components/ui/BrandLogo';
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-3 flex-shrink-0" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [department, setDepartment] = useState('Computer Science & Engineering');
   const [yearOfStudy, setYearOfStudy] = useState('3rd Year');
-  const [role, setRole] = useState('student');
+  const [role] = useState('student');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');

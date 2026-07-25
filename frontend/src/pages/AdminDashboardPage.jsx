@@ -2,13 +2,7 @@ import React, { useState, useEffect } from 'react';
 import API from '../services/api';
 import { 
   ShieldCheck, 
-  Users, 
-  HelpCircle, 
-  MessageSquare, 
-  Trash2, 
-  UserCheck, 
-  FileText, 
-  AlertTriangle 
+  Trash2 
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
