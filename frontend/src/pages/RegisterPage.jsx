@@ -26,11 +26,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const FacebookIcon = () => (
-  <svg className="w-5 h-5 mr-3 flex-shrink-0" viewBox="0 0 24 24" fill="#1877F2">
-    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-  </svg>
-);
+
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -52,9 +48,7 @@ export default function RegisterPage() {
     window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
-  const handleFacebookLogin = () => {
-    window.location.href = `${API_BASE_URL}/auth/facebook`;
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -132,34 +126,6 @@ export default function RegisterPage() {
             {error}
           </div>
         )}
-
-        {/* OAuth Social Buttons */}
-        <div className="space-y-3 relative z-10">
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            className="w-full py-3 px-4 rounded-xl text-[14px] font-medium bg-[#1A1A1A] border border-[#2A2A2A] text-white hover:bg-[#222222] hover:border-[#3A3A3A] transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center justify-center cursor-pointer group"
-          >
-            <GoogleIcon />
-            <span className="group-hover:text-white transition-colors">Continue with Google</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleFacebookLogin}
-            className="w-full py-3 px-4 rounded-xl text-[14px] font-medium bg-[#1A1A1A] border border-[#2A2A2A] text-white hover:bg-[#222222] hover:border-[#3A3A3A] transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center justify-center cursor-pointer group"
-          >
-            <FacebookIcon />
-            <span className="group-hover:text-white transition-colors">Continue with Facebook</span>
-          </button>
-        </div>
-
-        {/* Visual Divider */}
-        <div className="relative flex py-2 items-center z-10">
-          <div className="flex-grow border-t border-[#2A2A2A]"></div>
-          <span className="flex-shrink mx-4 text-[#71717A] text-[11px] font-semibold tracking-wider uppercase">OR</span>
-          <div className="flex-grow border-t border-[#2A2A2A]"></div>
-        </div>
 
         {/* Email & Password Registration Form */}
         <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
@@ -282,6 +248,25 @@ export default function RegisterPage() {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
+
+        {/* Visual Divider */}
+        <div className="relative flex py-2 items-center z-10">
+          <div className="flex-grow border-t border-[#2A2A2A]"></div>
+          <span className="flex-shrink mx-4 text-[#71717A] text-[11px] font-semibold tracking-wider uppercase">OR</span>
+          <div className="flex-grow border-t border-[#2A2A2A]"></div>
+        </div>
+
+        {/* Secondary Action: OAuth Google Button */}
+        <div className="relative z-10">
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full py-3 px-4 rounded-xl text-[14px] font-medium bg-[#1A1A1A] border border-[#2A2A2A] text-white hover:bg-[#222222] hover:border-[#3A3A3A] transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center justify-center cursor-pointer group"
+          >
+            <GoogleIcon />
+            <span className="group-hover:text-white transition-colors">Continue with Google</span>
+          </button>
+        </div>
 
         {/* Sign In Link */}
         <p className="text-center text-[13px] text-[#A1A1AA] pt-3 border-t border-[#2A2A2A] relative z-10">
