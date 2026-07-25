@@ -4,6 +4,11 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const { app } = require('../server');
 const seedDemoUsers = require('../utils/seedDemo');
 
+jest.mock('../services/geminiService', () => ({
+  generateAIAnswer: jest.fn().mockResolvedValue('Mocked AI explanation for Binary Search Tree.'),
+  generateRelatedQuestions: jest.fn().mockResolvedValue(['What is preorder traversal?', 'What is postorder traversal?']),
+}));
+
 let mongoServer;
 
 describe('CampusMind AI Backend API Test Suite', () => {
@@ -86,5 +91,36 @@ describe('CampusMind AI Backend API Test Suite', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toHaveProperty('explanation');
+  }, 15000);
+
+  it('GET /api/auth/google - should redirect to Google OAuth authorization URL', async () => {
+    const res = await request(app).get('/api/auth/google');
+    expect(res.statusCode).toEqual(302);
+    expect(res.headers.location).toContain('accounts.google.com');
+  });
+
+  it('GET /api/auth/facebook - should redirect to Facebook OAuth authorization URL', async () => {
+    const res = await request(app).get('/api/auth/facebook');
+    expect(res.statusCode).toEqual(302);
+    expect(res.headers.location).toContain('facebook.com');
+  });
+
+  it('POST /api/auth/refresh - should return 401 when no refresh token provided', async () => {
+    const res = await request(app).post('/api/auth/refresh');
+    expect(res.statusCode).toEqual(401);
+    expect(res.body.success).toBe(false);
+  });
+
+  it('POST /api/auth/logout - should log out cleanly', async () => {
+    const res = await request(app).post('/api/auth/logout');
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+  });
+
+  it('POST /api/auth/resend-verification - should resend verification email for demo student', async () => {
+    const res = await request(app)
+      .post('/api/auth/resend-verification')
+      .send({ email: 'student@campusmind.ai' });
+    expect([200, 400]).toContain(res.statusCode); // 400 if already verified, 200 if sent
   });
 });

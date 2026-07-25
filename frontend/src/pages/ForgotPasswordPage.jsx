@@ -69,10 +69,19 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all"
+              className="w-full py-3 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-lg shadow-indigo-500/20"
             >
               {loading ? 'Sending link...' : 'Send Password Reset Link'}
             </button>
+
+            <div className="text-center pt-2 flex flex-col gap-1.5 border-t border-slate-800/80">
+              <Link to="/login" className="text-xs font-bold text-slate-400 hover:text-white transition-colors pt-2">
+                ← Back to Login
+              </Link>
+              <Link to="/resend-verification" className="text-[11px] font-medium text-indigo-400/80 hover:text-indigo-300 transition-colors">
+                Need to activate your account instead? Resend Verification Email
+              </Link>
+            </div>
           </form>
         )}
 

@@ -6,11 +6,14 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
+const expressMongoSanitize = require('express-mongo-sanitize');
 
 // Load environment variables
 dotenv.config();
 
 const connectDB = require('./config/db');
+const passport = require('./config/passport');
 const { initSocket } = require('./services/socketService');
 const errorHandler = require('./middleware/errorHandler');
 const { apiLimiter } = require('./middleware/rateLimiter');
@@ -41,6 +44,8 @@ app.set('trust proxy', 1);
 // Body parsers & Security Middlewares
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+app.use(expressMongoSanitize());
 
 const allowedOrigins = process.env.CLIENT_URL
   ? [process.env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:3000']
@@ -48,6 +53,7 @@ const allowedOrigins = process.env.CLIENT_URL
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(morgan('dev'));
+app.use(passport.initialize());
 
 // Serve Uploaded Files statically
 app.use('/uploads', express.static(uploadsDir));

@@ -11,6 +11,9 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import OAuthCallbackPage from './pages/OAuthCallbackPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import ResendVerificationPage from './pages/ResendVerificationPage';
 import QuestionDetailPage from './pages/QuestionDetailPage';
 import LearningLabPage from './pages/LearningLabPage';
 import LeaderboardPage from './pages/LeaderboardPage';
@@ -60,6 +63,9 @@ export default function App() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password/:resettoken" element={<ResetPasswordPage />} />
+                <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+                <Route path="/resend-verification" element={<ResendVerificationPage />} />
+                <Route path="/oauth-callback" element={<OAuthCallbackPage />} />
                 
                 <Route path="/questions/:id" element={<QuestionDetailPage />} />
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
