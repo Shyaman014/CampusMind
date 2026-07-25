@@ -8,12 +8,12 @@ exports.explainQuestion = async (req, res) => {
   try {
     const { title, content, explanationLevel } = req.body;
 
-    if (!title) {
-      return errorResponse(res, 400, 'Question title is required');
+    if (!title || typeof title !== 'string' || !title.trim()) {
+      return errorResponse(res, 400, 'A valid question title is required');
     }
 
-    const explanation = await generateAIAnswer(title, content || '', explanationLevel || 'standard');
-    const relatedQuestions = await generateRelatedQuestions(title, content || '');
+    const explanation = await generateAIAnswer(title.trim(), content || '', explanationLevel || 'standard');
+    const relatedQuestions = await generateRelatedQuestions(title.trim(), content || '');
 
     return successResponse(res, 200, 'AI explanation generated successfully', {
       explanation,
@@ -21,7 +21,8 @@ exports.explainQuestion = async (req, res) => {
       relatedQuestions,
     });
   } catch (error) {
-    return errorResponse(res, 500, 'AI explanation failed', error);
+    const statusCode = error.statusCode || 500;
+    return errorResponse(res, statusCode, error.message || 'AI explanation failed', error);
   }
 };
 
@@ -31,9 +32,13 @@ exports.explainQuestion = async (req, res) => {
 exports.getRelatedQuestions = async (req, res) => {
   try {
     const { title, content } = req.body;
-    const questions = await generateRelatedQuestions(title, content);
+    if (!title || typeof title !== 'string' || !title.trim()) {
+      return errorResponse(res, 400, 'A valid question title is required');
+    }
+    const questions = await generateRelatedQuestions(title.trim(), content);
     return successResponse(res, 200, 'Related questions generated', questions);
   } catch (error) {
-    return errorResponse(res, 500, 'Failed to generate related questions', error);
+    const statusCode = error.statusCode || 500;
+    return errorResponse(res, statusCode, error.message || 'Failed to generate related questions', error);
   }
 };

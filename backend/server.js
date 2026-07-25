@@ -15,11 +15,13 @@ const { initSocket } = require('./services/socketService');
 const errorHandler = require('./middleware/errorHandler');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
-// Connect Database
-connectDB().then(() => {
-  const seedDemoUsers = require('./utils/seedDemo');
-  seedDemoUsers();
-});
+// Connect Database (skip during Jest testing to allow MongoMemoryServer control)
+if (process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID) {
+  connectDB().then(() => {
+    const seedDemoUsers = require('./utils/seedDemo');
+    seedDemoUsers();
+  });
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -33,14 +35,19 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+// Trust reverse proxy (Railway/Vercel) for express-rate-limit and client IPs
+app.set('trust proxy', 1);
+
 // Body parsers & Security Middlewares
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cors({ origin: true, credentials: true }));
+
+const allowedOrigins = process.env.CLIENT_URL
+  ? [process.env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:3000']
+  : true;
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(morgan('dev'));
-
-// No xss-clean module (removed dead code)
 
 // Serve Uploaded Files statically
 app.use('/uploads', express.static(uploadsDir));

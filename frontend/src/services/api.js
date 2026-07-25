@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,4 +21,5 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+export { API_BASE_URL };
 export default API;

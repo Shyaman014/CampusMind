@@ -14,22 +14,31 @@ const callLLM = async (messages) => {
     : String(messages);
 
   if (!openai) {
-    throw new Error('AI service is not configured. Please set a valid GROQ_API_KEY in your .env file.');
+    const err = new Error('AI service is currently unavailable due to missing API key configuration.');
+    err.statusCode = 503;
+    throw err;
   }
 
-  const response = await openai.chat.completions.create({
-    model: GROQ_MODEL,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: prompt },
-    ],
-  });
+  try {
+    const response = await openai.chat.completions.create({
+      model: GROQ_MODEL,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: prompt },
+      ],
+    });
 
-  const text = response.choices[0]?.message?.content;
-  if (!text) {
-    throw new Error('No content returned from Groq.');
+    const text = response.choices[0]?.message?.content;
+    if (!text) {
+      const err = new Error('No content returned from AI service.');
+      err.statusCode = 502;
+      throw err;
+    }
+    return text;
+  } catch (err) {
+    err.statusCode = err.statusCode || err.status || 503;
+    throw err;
   }
-  return text;
 };
 
 

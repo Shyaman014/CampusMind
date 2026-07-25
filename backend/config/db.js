@@ -8,7 +8,11 @@ const connectDB = async () => {
     });
     console.log(`[MongoDB] Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error("MongoDB Error:", error);
+    console.error("MongoDB Connection Error:", error.message);
+    console.error("Please ensure your IP is whitelisted in MongoDB Atlas (0.0.0.0/0 for Railway/production).");
+    if (!process.env.JEST_WORKER_ID && process.env.NODE_ENV !== 'test') {
+      process.exit(1);
+    }
   }
 };
 

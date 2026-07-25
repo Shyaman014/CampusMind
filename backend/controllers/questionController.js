@@ -50,7 +50,7 @@ exports.askQuestion = async (req, res) => {
         question.aiAnswered = true;
         await question.save();
       })
-      .catch((err) => console.error('[AI Auto-Answer Error]', err));
+      .catch((err) => console.error('[AI Auto-Answer Error]:', err.message || err));
 
     return successResponse(res, 201, 'Question posted successfully', question);
   } catch (error) {

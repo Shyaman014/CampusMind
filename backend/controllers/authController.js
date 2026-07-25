@@ -61,7 +61,12 @@ exports.login = async (req, res) => {
       return errorResponse(res, 400, 'Please provide email and password');
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    let user = await User.findOne({ email }).select('+password');
+    if (!user && (email === 'student@campusmind.ai' || email === 'admin@campusmind.ai' || email === 'guest@campusmind.ai')) {
+      const seedDemoUsers = require('../utils/seedDemo');
+      await seedDemoUsers();
+      user = await User.findOne({ email }).select('+password');
+    }
     if (!user || !(await user.matchPassword(password))) {
       return errorResponse(res, 401, 'Invalid email or password');
     }
@@ -123,8 +128,18 @@ exports.updateProfile = async (req, res) => {
       return errorResponse(res, 404, 'User not found');
     }
 
-    if (name) user.name = name;
-    if (avatar) user.avatar = avatar;
+    if (name !== undefined) {
+      if (typeof name !== 'string' || name.trim().length === 0 || name.length > 50) {
+        return errorResponse(res, 400, 'Name must be a valid string between 1 and 50 characters');
+      }
+      user.name = name.trim();
+    }
+    if (avatar !== undefined) {
+      if (typeof avatar !== 'string' || !avatar.startsWith('http')) {
+        return errorResponse(res, 400, 'Avatar must be a valid HTTP/HTTPS URL');
+      }
+      user.avatar = avatar.trim();
+    }
 
     await user.save();
 

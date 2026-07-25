@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import API from '../services/api';
+import API, { API_BASE_URL } from '../services/api';
 import ChatSidebar from '../components/chat/ChatSidebar';
 import ChatInputBar from '../components/chat/ChatInputBar';
 import { User as UserIcon, Copy, Check, FileText, Menu, ThumbsUp, ThumbsDown, Edit2, RotateCcw } from 'lucide-react';
@@ -119,7 +119,8 @@ export default function ChatGPTView() {
   const streamResponseToBackend = async (promptText, attachments) => {
     const token = localStorage.getItem('campusmind_token');
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chats/stream`, {
+      const streamUrl = API_BASE_URL.endsWith('/api') ? `${API_BASE_URL}/chats/stream` : `${API_BASE_URL}/api/chats/stream`;
+      const response = await fetch(streamUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
         body: JSON.stringify({ chatId: isTemporary ? null : activeChatId, message: promptText, attachments }),

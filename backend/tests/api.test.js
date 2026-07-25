@@ -1,9 +1,28 @@
 const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const { app } = require('../server');
+const seedDemoUsers = require('../utils/seedDemo');
+
+let mongoServer;
 
 describe('CampusMind AI Backend API Test Suite', () => {
   let userToken;
   let questionId;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
+    await mongoose.connect(uri);
+    await seedDemoUsers();
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+  });
 
   it('GET /api/health - should return 200 OK health status', async () => {
     const res = await request(app).get('/api/health');

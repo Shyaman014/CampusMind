@@ -61,7 +61,7 @@ const optionalAuth = async (req, res, next) => {
   }
 
   // Fallback Guest User for instant access
-  req.user = { id: '65f1a2b3c4d5e6f7a8b9c0d1', name: 'Campus Scholar', role: 'student' };
+  req.user = { _id: '65f1a2b3c4d5e6f7a8b9c0d1', id: '65f1a2b3c4d5e6f7a8b9c0d1', name: 'Campus Scholar', role: 'student' };
   next();
 };
 

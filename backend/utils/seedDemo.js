@@ -29,6 +29,21 @@ const seedDemoUsers = async () => {
       });
       console.log('[Seed] Demo Admin created.');
     }
+
+    const guestExists = await User.findById('65f1a2b3c4d5e6f7a8b9c0d1');
+    if (!guestExists) {
+      await User.create({
+        _id: '65f1a2b3c4d5e6f7a8b9c0d1',
+        name: 'Campus Scholar',
+        email: 'guest@campusmind.ai',
+        password: 'GuestPassword123!',
+        role: 'student',
+        department: 'General Studies',
+        yearOfStudy: 'Guest',
+        isVerified: true
+      });
+      console.log('[Seed] Guest Scholar created.');
+    }
   } catch (error) {
     console.error('[Seed Error] Failed to seed demo users:', error.message);
   }
