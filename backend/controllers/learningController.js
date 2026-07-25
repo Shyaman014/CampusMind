@@ -1,22 +1,37 @@
+const path = require('path');
 const Upload = require('../models/Upload');
 const { analyzeUploadedMaterial } = require('../services/geminiService');
+const { extractTextFromAttachment } = require('../utils/fileExtractor');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
-// @desc    Upload file & auto-generate learning materials (Summary, Flashcards, Quiz)
+// @desc    Upload file & auto-generate learning materials (Summary, Flashcards, Quiz, Notes)
 // @route   POST /api/learning/upload
 // @access  Private
 exports.uploadMaterial = async (req, res) => {
   try {
     if (!req.file) {
-      return errorResponse(res, 400, 'Please upload a PDF or Image file');
+      return errorResponse(res, 400, 'Please upload a valid study document or image');
     }
 
     const fileUrl = `/uploads/${req.file.filename}`;
-    const isPdf = req.file.mimetype === 'application/pdf';
-    const fileType = isPdf ? 'pdf' : 'image';
+    const ext = path.extname(req.file.originalname || '').toLowerCase();
+    
+    let fileType = 'doc';
+    if (ext === '.pdf' || req.file.mimetype === 'application/pdf') fileType = 'pdf';
+    else if (['.jpg', '.jpeg', '.png', '.webp'].includes(ext) || req.file.mimetype?.startsWith('image/')) fileType = 'image';
+    else if (['.ppt', '.pptx'].includes(ext)) fileType = 'ppt';
+    else if (['.md', '.txt'].includes(ext)) fileType = 'txt';
+    else if (['.doc', '.docx'].includes(ext)) fileType = 'docx';
 
-    // Invoke Gemini AI to extract key insights, flashcards, quiz, summary
-    const aiAnalysis = await analyzeUploadedMaterial(req.file.originalname);
+    let extractedText = '';
+    try {
+      extractedText = await extractTextFromAttachment({ fileName: req.file.originalname, fileUrl });
+    } catch (err) {
+      console.warn('Text extraction warning in learningController:', err.message);
+    }
+
+    // Invoke Gemini AI to extract key insights, flashcards, quiz, summary, and 4-tier notes
+    const aiAnalysis = await analyzeUploadedMaterial(req.file.originalname, extractedText);
 
     const upload = await Upload.create({
       user: req.user._id,
@@ -27,6 +42,7 @@ exports.uploadMaterial = async (req, res) => {
       importantPoints: aiAnalysis.importantPoints,
       flashcards: aiAnalysis.flashcards,
       quiz: aiAnalysis.quiz,
+      notes: aiAnalysis.notes,
     });
 
     return successResponse(res, 201, 'File uploaded and AI analysis complete', upload);

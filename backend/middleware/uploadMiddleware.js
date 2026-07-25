@@ -15,13 +15,23 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     'image/jpeg', 'image/png', 'image/jpg', 'image/webp', 
     'application/pdf', 
+    'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
-    'text/plain'
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'text/markdown',
+    'text/x-markdown',
+    'application/octet-stream'
   ];
-  if (allowedTypes.includes(file.mimetype)) {
+
+  const ext = path.extname(file.originalname || '').toLowerCase();
+  const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.pdf', '.doc', '.docx', '.txt', '.md', '.ppt', '.pptx'];
+
+  if (allowedTypes.includes(file.mimetype) || allowedExts.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPG, PNG, WEBP, PDF, DOCX, and TXT files are allowed.'), false);
+    cb(new Error('Invalid file type. Allowed: PDF, DOCX, TXT, MD, PPT, JPG, PNG, WEBP.'), false);
   }
 };
 

@@ -29,7 +29,7 @@ const UploadSchema = new mongoose.Schema(
     },
     fileType: {
       type: String,
-      enum: ['pdf', 'image', 'doc'],
+      enum: ['pdf', 'image', 'doc', 'docx', 'txt', 'md', 'ppt', 'pptx'],
       required: true,
     },
     summary: {
@@ -43,6 +43,12 @@ const UploadSchema = new mongoose.Schema(
     ],
     flashcards: [FlashcardSchema],
     quiz: [QuizQuestionSchema],
+    notes: {
+      detailed: { type: String, default: '' },
+      short: { type: String, default: '' },
+      exam: { type: String, default: '' },
+      revision: { type: String, default: '' },
+    },
   },
   {
     timestamps: true,

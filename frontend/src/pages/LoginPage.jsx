@@ -157,13 +157,16 @@ export default function LoginPage() {
         )}
 
         {/* Email & Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
+        <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-4 relative z-10">
           <div className="space-y-1.5">
-            <label className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Email</label>
+            <label htmlFor="email" className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Email</label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-3 w-4 h-4 text-[#A1A1AA]" />
               <input
+                id="email"
+                name="email"
                 type="email"
+                autoComplete="username"
                 required
                 placeholder="name@campus.edu"
                 value={email}
@@ -175,7 +178,7 @@ export default function LoginPage() {
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Password</label>
+              <label htmlFor="password" className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Password</label>
               <Link to="/forgot-password" className="text-[11px] font-medium text-[#A1A1AA] hover:text-white transition-colors">
                 Forgot Password?
               </Link>
@@ -183,7 +186,10 @@ export default function LoginPage() {
             <div className="relative">
               <Lock className="absolute left-3.5 top-3 w-4 h-4 text-[#A1A1AA]" />
               <input
+                id="password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
                 required
                 placeholder="••••••••"
                 value={password}
@@ -201,8 +207,10 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-between pt-1">
-            <label className="flex items-center space-x-2 cursor-pointer select-none">
+            <label htmlFor="rememberMe" className="flex items-center space-x-2 cursor-pointer select-none">
               <input
+                id="rememberMe"
+                name="rememberMe"
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}

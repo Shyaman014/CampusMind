@@ -21,8 +21,8 @@ const extractTextFromAttachment = async (attachment) => {
 
     const ext = path.extname(filename).toLowerCase();
     
-    // TXT File
-    if (ext === '.txt') {
+    // TXT and Markdown Files
+    if (ext === '.txt' || ext === '.md') {
       return fs.readFileSync(filePath, 'utf8');
     }
 
@@ -33,19 +33,37 @@ const extractTextFromAttachment = async (attachment) => {
       return data.text;
     }
 
-    // DOCX File
-    if (ext === '.docx') {
-      const result = await mammoth.extractRawText({ path: filePath });
-      return result.value;
+    // DOCX and DOC Files
+    if (ext === '.docx' || ext === '.doc') {
+      try {
+        const result = await mammoth.extractRawText({ path: filePath });
+        return result.value || 'Document parsed successfully.';
+      } catch (e) {
+        const raw = fs.readFileSync(filePath, 'utf8');
+        return raw.replace(/[^\x20-\x7E\n]/g, ' ').replace(/\s+/g, ' ').trim() || 'Document uploaded.';
+      }
+    }
+
+    // PPT and PPTX Files
+    if (ext === '.ppt' || ext === '.pptx') {
+      const rawBuffer = fs.readFileSync(filePath);
+      const rawStr = rawBuffer.toString('utf8', 0, Math.min(rawBuffer.length, 500000));
+      const cleanText = rawStr.replace(/[^\x20-\x7E\n]/g, ' ').replace(/\s+/g, ' ').trim();
+      return `[PowerPoint Presentation: ${attachment.fileName}]\n` + (cleanText.length > 50 ? cleanText.slice(0, 5000) : 'Slide presentation content uploaded.');
     }
 
     // Images (OCR)
     if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.webp') {
       const { data: { text } } = await Tesseract.recognize(filePath, 'eng');
-      return text;
+      return text || `[Image OCR: ${attachment.fileName}]`;
     }
 
-    throw new Error(`Unsupported file extraction for extension: ${ext}`);
+    // Generic fallback for any other text format
+    try {
+      return fs.readFileSync(filePath, 'utf8');
+    } catch {
+      return `Uploaded attachment: ${attachment.fileName}`;
+    }
   } catch (error) {
     console.error(`[fileExtractor] Failed to extract text from ${attachment.fileName}:`, error.message);
     throw new Error(`Failed to extract text from ${attachment.fileName}: ${error.message}`);

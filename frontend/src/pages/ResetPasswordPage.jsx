@@ -60,15 +60,18 @@ export default function ResetPasswordPage() {
             <span>Password updated! Redirecting to login...</span>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
+          <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-4 relative z-10">
             {error && <div className="p-3 rounded-xl bg-rose-500/10 text-rose-300 text-xs font-semibold text-center">{error}</div>}
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-300 uppercase">New Password</label>
+              <label htmlFor="password" className="block text-xs font-bold text-slate-300 uppercase">New Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
                 <input
+                  id="password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   placeholder="••••••••"
                   value={password}
@@ -86,11 +89,14 @@ export default function ResetPasswordPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-300 uppercase">Confirm Password</label>
+              <label htmlFor="confirmPassword" className="block text-xs font-bold text-slate-300 uppercase">Confirm Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
                 <input
+                  id="confirmPassword"
+                  name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   placeholder="••••••••"
                   value={confirmPassword}

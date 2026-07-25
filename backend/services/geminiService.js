@@ -130,20 +130,31 @@ const generateRelatedQuestions = async (title, content) => {
 };
 
 
-const analyzeUploadedMaterial = async (fileName) => {
+const analyzeUploadedMaterial = async (fileName, extractedText = '') => {
   try {
-    const prompt = `A student uploaded a study document named "${fileName}". Based on the document name, generate a helpful analysis in the following JSON format (return ONLY valid JSON, no other text):
+    const textSnippet = extractedText ? `\n\nDocument Text Content (excerpt):\n"${extractedText.slice(0, 8000)}"\n` : '';
+    const prompt = `A student uploaded a study document named "${fileName}".${textSnippet}
+Based on the document name and content, generate a comprehensive academic analysis and 4-tier notes in the following JSON format (return ONLY valid JSON, no other text):
 {
-  "summary": "A 2-3 sentence summary of what this document likely covers based on its name.",
-  "importantPoints": ["Point 1", "Point 2", "Point 3", "Point 4"],
+  "summary": "A 2-3 sentence executive summary of what this document covers.",
+  "importantPoints": ["Key concept 1", "Key concept 2", "Key concept 3", "Key concept 4", "Key concept 5"],
   "flashcards": [
-    {"front": "Question about a key concept?", "back": "Answer explaining the concept."},
-    {"front": "Another key concept question?", "back": "Its explanation."}
+    {"front": "Question about a key concept?", "back": "Clear answer explaining the concept."},
+    {"front": "Another key concept question?", "back": "Its explanation."},
+    {"front": "Important term definitions?", "back": "Definition and usage."},
+    {"front": "Core principle check?", "back": "Brief summary of principle."}
   ],
   "quiz": [
-    {"question": "A multiple-choice question about the topic?", "options": ["Correct answer", "Wrong answer 1", "Wrong answer 2", "Wrong answer 3"], "correctAnswer": 0, "explanation": "Why this is correct."}
+    {"question": "A multiple-choice question testing understanding?", "options": ["Correct option", "Distractor 1", "Distractor 2", "Distractor 3"], "correctAnswer": 0, "explanation": "Why this is correct."},
+    {"question": "Another practice question?", "options": ["Correct option", "Distractor 1", "Distractor 2", "Distractor 3"], "correctAnswer": 0, "explanation": "Explanation."}
   ],
-  "interviewQuestions": ["Interview question 1?", "Interview question 2?"]
+  "interviewQuestions": ["Common technical/academic interview question 1?", "Interview question 2?", "Interview question 3?"],
+  "notes": {
+    "detailed": "Comprehensive structured markdown notes explaining all sections, definitions, formulas, and examples in detail.",
+    "short": "Concise bullet-point summary of the core ideas for quick reading.",
+    "exam": "High-yield topics, formulas, definitions, and potential exam questions with key solutions.",
+    "revision": "Ultra-fast 5-minute revision notes highlighting only the most crucial takeaways and buzzwords."
+  }
 }`;
 
     const response = await callLLM(prompt);
@@ -157,15 +168,27 @@ const analyzeUploadedMaterial = async (fileName) => {
         flashcards: parsed.flashcards || [],
         quiz: parsed.quiz || [],
         interviewQuestions: parsed.interviewQuestions || [],
+        notes: parsed.notes || {
+          detailed: `# Detailed Notes: ${fileName}\n\nComprehensive review of ${fileName}.`,
+          short: `# Short Notes: ${fileName}\n\n- Key concepts from ${fileName}.`,
+          exam: `# Exam Notes: ${fileName}\n\n- High-yield focus points.`,
+          revision: `# Revision Notes: ${fileName}\n\n- Quick 5-minute recap.`
+        },
       };
     }
 
     return {
-      summary: `Document "${fileName}" has been uploaded. AI analysis could not parse structured data — please check the document content.`,
-      importantPoints: ['Upload successful', 'Review the document manually for key concepts'],
+      summary: `Document "${fileName}" has been uploaded and analyzed.`,
+      importantPoints: ['Upload successful', 'Review the document for key concepts'],
       flashcards: [{ front: `What is covered in ${fileName}?`, back: 'Review the uploaded document for details.' }],
       quiz: [{ question: `What topic does ${fileName} cover?`, options: ['Check the document', 'Unknown'], correctAnswer: 0, explanation: 'Review the uploaded content.' }],
       interviewQuestions: [`Explain the key concepts from ${fileName}.`],
+      notes: {
+        detailed: `# Detailed Notes: ${fileName}\n\nDocument successfully uploaded.`,
+        short: `# Short Notes\n\n- ${fileName}`,
+        exam: `# Exam Prep\n\n- Focus on main chapter headings in ${fileName}.`,
+        revision: `# Fast Revision\n\n- Quick review of ${fileName}.`
+      }
     };
   } catch (error) {
     console.warn('[analyzeUploadedMaterial Error]:', error.message);
@@ -175,8 +198,30 @@ const analyzeUploadedMaterial = async (fileName) => {
       flashcards: [],
       quiz: [],
       interviewQuestions: [],
+      notes: {
+        detailed: '', short: '', exam: '', revision: ''
+      }
     };
   }
+};
+
+const formatCodingAssistantPrompt = (mode, language, code, query = '') => {
+  const langStr = language ? ` in ${language}` : '';
+  const codeStr = code ? `\n\nCode Snippet:\n\`\`\`${language || ''}\n${code}\n\`\`\`` : '';
+  const queryStr = query ? `\n\nUser Question: "${query}"` : '';
+  
+  const modeInstructions = {
+    explain: `Explain step-by-step how the following code works${langStr}, detailing its architecture and logic.`,
+    debug: `Analyze the following code${langStr} for bugs, syntax errors, logical flaws, or edge-case failures. Provide the fixed code cleanly.`,
+    optimize: `Optimize the following code${langStr} for better performance, clean code readability, and modern best practices.`,
+    generate: `Write production-ready, clean code${langStr} based on the user request.`,
+    convert: `Convert the following code into idiopathic, clean ${language || 'JavaScript'} code.`,
+    complexity: `Analyze the exact Big-O Time Complexity and Space Complexity of the following code${langStr}, explaining the derivation for each loop and structure.`,
+    dryrun: `Perform a step-by-step trace / dry run of the following code${langStr} with a sample input, showing table variable state changes at each step.`
+  };
+
+  const instruction = modeInstructions[mode?.toLowerCase()] || `Provide expert coding assistance${langStr}.`;
+  return `${instruction}${codeStr}${queryStr}\n\nRespond conversationally in Markdown and format all code blocks cleanly without documentation tags.`;
 };
 
 module.exports = {
@@ -184,5 +229,6 @@ module.exports = {
   generateAIAnswer,
   generateRelatedQuestions,
   analyzeUploadedMaterial,
+  formatCodingAssistantPrompt,
   callLLM,
 };

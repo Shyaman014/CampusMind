@@ -57,16 +57,19 @@ export default function ResendVerificationPage() {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-4">
             {error && <div className="p-3 rounded-xl bg-rose-500/10 text-rose-300 text-xs font-semibold text-center">{error}</div>}
             {successMsg && <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-300 text-xs font-semibold text-center">{successMsg}</div>}
             
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Email Address</label>
+              <label htmlFor="email" className="block text-xs font-bold text-slate-300 uppercase mb-1">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
                 <input
+                  id="email"
+                  name="email"
                   type="email"
+                  autoComplete="username"
                   required
                   placeholder="student@campus.edu"
                   value={email}

@@ -128,14 +128,17 @@ export default function RegisterPage() {
         )}
 
         {/* Email & Password Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
+        <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-4 relative z-10">
           
           <div className="space-y-1.5">
-            <label className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Name</label>
+            <label htmlFor="name" className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Name</label>
             <div className="relative">
               <User className="absolute left-3.5 top-3 w-4 h-4 text-[#A1A1AA]" />
               <input
+                id="name"
+                name="name"
                 type="text"
+                autoComplete="name"
                 required
                 placeholder="Alex Rivera"
                 value={name}
@@ -146,11 +149,14 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Email</label>
+            <label htmlFor="email" className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Email</label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-3 w-4 h-4 text-[#A1A1AA]" />
               <input
+                id="email"
+                name="email"
                 type="email"
+                autoComplete="username"
                 required
                 placeholder="alex@campus.edu"
                 value={email}
@@ -162,11 +168,14 @@ export default function RegisterPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Password</label>
+              <label htmlFor="password" className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3 w-4 h-4 text-[#A1A1AA]" />
                 <input
+                  id="password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   placeholder="••••••••"
                   value={password}
@@ -184,11 +193,14 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Confirm Password</label>
+              <label htmlFor="confirmPassword" className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Confirm Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3 w-4 h-4 text-[#A1A1AA]" />
                 <input
+                  id="confirmPassword"
+                  name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   placeholder="••••••••"
                   value={confirmPassword}
@@ -208,8 +220,10 @@ export default function RegisterPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Department</label>
+              <label htmlFor="department" className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Department</label>
               <select
+                id="department"
+                name="department"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
                 className="w-full px-3 py-2.5 text-[13px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white focus:outline-none focus:border-[#52525B] transition-all duration-150 appearance-none"
@@ -224,8 +238,10 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Year of Study</label>
+              <label htmlFor="yearOfStudy" className="block text-[11px] font-semibold text-[#A1A1AA] uppercase tracking-wider">Year of Study</label>
               <select
+                id="yearOfStudy"
+                name="yearOfStudy"
                 value={yearOfStudy}
                 onChange={(e) => setYearOfStudy(e.target.value)}
                 className="w-full px-3 py-2.5 text-[13px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white focus:outline-none focus:border-[#52525B] transition-all duration-150 appearance-none"
