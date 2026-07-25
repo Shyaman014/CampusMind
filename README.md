@@ -1,17 +1,62 @@
-# CampusMind AI 🎓🤖
+# CampusMind AI v2.0 🎓🤖
 
-An intelligent, premium academic assistant designed to help students learn, build, and succeed. CampusMind AI serves as a centralized hub for asking academic doubts, tracking learning streaks, uploading study materials, and earning reputation points—all wrapped in a sleek, modern, dark-themed UI.
+An intelligent, premium academic learning platform and coding assistant designed to help students learn, build, and succeed. Built on a clean MERN architecture, CampusMind AI serves as a centralized hub for interactive AI tutoring, multi-format document analysis, 4-tier study note synthesis, algorithm debugging, and gamified reputation tracking—all wrapped in a sleek, modern, dark-themed UI.
 
 ---
 
-## ✨ Features
+## ✨ Features & Capabilities
 
-- **Intelligent AI Chat**: Ask questions and get instant, detailed explanations formatted beautifully with Markdown and code highlighting.
-- **Student Dashboard**: Track your learning progress, including doubts asked, answers provided, daily streaks, and reputation points.
-- **Seamless Authentication**: Secure JWT-based authentication with distinct roles (Student & Admin) and automated demo accounts for quick testing.
-- **Profile Customization**: Click-to-edit your profile name and seamlessly upload/update your avatar directly from the dashboard.
-- **Context-Aware Learning**: Upload study materials and documents for the AI to understand your specific academic context.
-- **Premium UI/UX**: A highly polished, completely custom static dark theme avoiding generic gradients, featuring fluid micro-animations and a custom geometric brand identity.
+### 💬 1. Intelligent AI Chat & Assistant
+- **Streaming AI Responses**: Real-time markdown rendering with LaTeX math formatting and syntax highlighting via Prism.
+- **Prompt Editing & Regeneration**: Modify sent prompts on the fly or click **Regenerate** on any AI response.
+- **Version Comparison**: Seamlessly navigate between regenerated answer drafts with inline `< 1 / 2 >` version history controls.
+- **RLHF Analytics**: Inline helpful/unhelpful (`👍 / 👎`) feedback buttons wired directly to backend learning metrics.
+
+### 💻 2. Specialized Coding Assistant Mode
+- **Target Language Selector**: Instantly switch between `Python`, `JavaScript`, `TypeScript`, `Java`, `C++`, `C#`, `Go`, `Rust`, and `SQL`.
+- **One-Click Algorithm Tools**:
+  - 🔍 **Explain Code**: Step-by-step logic breakdown and execution flow.
+  - 🐞 **Debug & Fix**: Automated detection and correction of syntax and logical bugs.
+  - ⚡ **Optimize**: Refactoring for maximum performance and readability.
+  - 📊 **Time Complexity**: Big-O time and space complexity derivation.
+  - 🔄 **Code Converter**: Clean translation between programming languages.
+- **Copy Tooltip**: Instant one-click clipboard copy (`Copied!`) on code blocks.
+
+### 📚 3. 4-Tier AI Notes Synthesizer (Notes Lab)
+Upload lecture slides, textbooks, or research papers and generate structured study packs across 4 specialized depths:
+1. 📖 **Executive Summary**: High-level overview of core themes and concepts.
+2. 📚 **Detailed Study Notes**: Comprehensive, structured academic breakdown.
+3. ⚡ **Short Summary**: Quick takeaways for rapid review.
+4. 🎯 **Exam Cram & Cheatsheet**: Likely test questions, definitions, formulas, and high-yield review bullets.
+- **Interactive Tools**: Test your knowledge with auto-generated **Flashcard Decks** and **Practice Quizzes**.
+
+### 📄 4. Multi-Format Document Analysis & OCR
+- **Supported Formats**: Full parsing support for `.md`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.txt`, `.pdf`, and Images (`.png`, `.jpg`, `.jpeg`, `.webp`).
+- **Drag & Drop Workspace**: Visual drag-and-drop overlay with multi-file attachment pills and upload progress indicators.
+- **Fallback Vision OCR**: Integrated Tesseract.js pipeline for text extraction from scanned slides and image documents.
+
+### 📤 5. Multi-Format Export & Sharing
+Download your chat conversations and synthesized study notes in your preferred format:
+- 📄 Export as **Markdown** (`.md`)
+- 📝 Export as **Plain Text** (`.txt`)
+- 📘 Export as **Microsoft Word compatible** (`.docx`)
+- 🖨️ Save as **PDF / Print** (`.pdf`)
+
+### 🏆 6. Student Dashboard & Avatar System
+- **Gamified Progress**: Track learning streaks, questions asked, community answers provided, and reputation points.
+- **Priority Avatar System**:
+  1. 📷 **Custom Uploaded Photo**: Upload directly from your profile dashboard.
+  2. 🌐 **Google OAuth Photo**: Displays your Google account avatar automatically upon social login.
+  3. 🎨 **Initials Avatar Badge**: Sleek gradient initials badge generated automatically if no photo exists.
+
+---
+
+## 🎨 Brand Identity & Design Philosophy
+
+CampusMind AI rejects generic stock illustrations and noisy colorful gradients. Instead, it embraces a **premium, monochrome architectural design**:
+- **Deep Monochrome Palette**: High-contrast `#0B0B0B` to `#171717` dark backgrounds paired with crisp white typography.
+- **Geometric Brand Emblem**: Our official logo features a smooth **Open Knowledge Loop** (an open circular ring representing continuous learning) paired with an upper-right **AI Spark Dot** (representing the catalytic node of artificial intelligence).
+- **Fluid Micro-interactions**: Smooth hover elevations, subtle glowing accents, and zero horizontal overflow across Desktop, Tablet, and Mobile devices.
 
 ---
 
@@ -19,31 +64,30 @@ An intelligent, premium academic assistant designed to help students learn, buil
 
 ### Frontend (Client)
 - **Framework**: React.js (via Vite)
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS & Vanilla CSS Design Variables
 - **Routing**: React Router DOM
 - **Icons**: Lucide React
-- **State Management**: React Context API
-- **Rendering**: React Markdown, Rehype Highlight, Remark GFM
+- **State Management**: React Context API (`AuthContext`)
+- **Rendering**: React Markdown, Remark GFM, Prism Syntax Highlighter
 
 ### Backend (Server)
 - **Runtime**: Node.js
 - **Framework**: Express.js
-- **Database**: MongoDB (via Mongoose)
-- **Authentication**: JWT (JSON Web Tokens) & bcryptjs
-- **Real-time**: Socket.io
-- **AI Integration**: Gemini API (`@google/genai` or similar)
-- **File Uploads**: Multer
+- **Database**: MongoDB (via Mongoose Schemas & Migrations)
+- **Authentication**: JWT (JSON Web Tokens), bcryptjs & Google OAuth (Passport.js)
+- **AI Integration**: Google Gemini API (`@google/genai`)
+- **File Uploads & Extraction**: Multer, pdf-parse, mammoth, Tesseract.js (OCR)
 
 ---
 
 ## 🚀 Getting Started
 
-Follow these instructions to set up the project locally on your machine.
+Follow these instructions to set up and run CampusMind AI locally on your machine.
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- [MongoDB](https://www.mongodb.com/) (Local instance or Atlas URI)
-- AI API Key (e.g., Gemini / Groq / OpenAI)
+- [MongoDB](https://www.mongodb.com/) (Local instance or MongoDB Atlas URI)
+- AI API Key (e.g., Google Gemini API Key)
 
 ### 1. Clone the Repository
 ```bash
@@ -66,7 +110,6 @@ MONGO_URI=mongodb://localhost:27017/campusmind
 JWT_SECRET=your_super_secret_jwt_key
 JWT_EXPIRE=30d
 CLIENT_URL=http://localhost:5173
-# AI Keys
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
@@ -93,8 +136,8 @@ The application will be running at `http://localhost:5173`.
 
 The application automatically seeds two demo accounts into the database upon startup. You can instantly log in using the **Instant Demo Login** buttons on the Login Page, or manually via:
 
-- **Student:** `student@campusmind.ai` / `Password123!`
-- **Admin:** `admin@campusmind.ai` / `AdminPassword123!`
+- **Student Account:** `student@campusmind.ai` / `Password123!`
+- **Admin Account:** `admin@campusmind.ai` / `AdminPassword123!`
 
 ---
 
@@ -103,36 +146,27 @@ The application automatically seeds two demo accounts into the database upon sta
 ```text
 CampusMind-AI/
 ├── backend/
-│   ├── config/          # DB connection & external service configs
-│   ├── controllers/     # Route logic (Auth, Chat, Dashboard, etc.)
-│   ├── middleware/      # JWT Protect, Rate Limiting, File Uploads
-│   ├── models/          # Mongoose Schemas (User, Question, etc.)
-│   ├── routes/          # Express route definitions
-│   ├── services/        # AI Service integration (Gemini)
-│   ├── utils/           # Database seeders, API Responders
-│   └── server.js        # Entry point
+│   ├── config/          # DB connection & Passport OAuth configs
+│   ├── controllers/     # Route logic (Auth, Chat, Learning, Dashboard)
+│   ├── middleware/      # JWT Protect, Rate Limiting, Multer File Uploads
+│   ├── models/          # Mongoose Schemas (User, Chat, Upload, Question)
+│   ├── routes/          # Express API route definitions
+│   ├── services/        # AI Service integration (Gemini 4-tier synthesis)
+│   ├── utils/           # Multi-format Document Extractor & OCR utilities
+│   └── server.js        # Server entry point
 │
 └── frontend/
     ├── src/
-    │   ├── components/  # Reusable UI (Chat, Layouts, Icons)
-    │   ├── context/     # AuthContext for global state
-    │   ├── pages/       # Login, Register, Dashboard, ChatGPTView
-    │   ├── services/    # Axios API interceptors
+    │   ├── components/  # Reusable UI (Sidebar, InputBar, BrandLogo, UserAvatar)
+    │   ├── context/     # AuthContext for global authentication state
+    │   ├── pages/       # Login, Register, Dashboard, ChatGPTView, LearningLabPage
+    │   ├── services/    # Axios API client & token interceptors
     │   ├── index.css    # Tailwind entry & custom CSS variables
-    │   └── main.jsx     # React entry point
-    ├── index.html       # HTML Template
+    │   └── main.jsx     # React DOM entry point
+    ├── favicon.svg      # Geometric brand SVG favicon
+    ├── index.html       # HTML Root Template
     └── vite.config.js   # Vite configuration
 ```
-
----
-
-## 🎨 Design Philosophy
-
-CampusMind AI rejects generic stock illustrations and noisy colorful gradients. Instead, it embraces a **premium, monochrome architectural design**:
-- Deep `#0B0B0B` to `#171717` backgrounds.
-- High-contrast crisp white typography.
-- Meaningful micro-interactions and transitions.
-- A custom geometric logo representing a continuous cycle of knowledge (the outer 'C') and the catalyst of intelligence (the inner 'Spark').
 
 ---
 
