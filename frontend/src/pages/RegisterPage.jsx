@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../services/api';
 import { Mail, Lock, User, ArrowRight, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import CampusMindIcon from '../components/ui/CampusMindIcon';
+import BrandLogo from '../components/ui/BrandLogo';
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-3 flex-shrink-0" viewBox="0 0 24 24">
@@ -114,7 +115,7 @@ export default function RegisterPage() {
 
         {/* Header: Logo & Join Title */}
         <div className="text-center space-y-3 flex flex-col items-center relative z-10">
-          <CampusMindIcon size={44} />
+          <BrandLogo size={56} iconSize={34} />
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Join CampusMind AI</h2>
             <p className="text-sm text-[#A1A1AA] mt-1">Create your account to ask doubts and earn reputation</p>

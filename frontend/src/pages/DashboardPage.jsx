@@ -101,11 +101,9 @@ export default function DashboardPage() {
         <div className="flex items-center space-x-6 w-full md:w-auto">
           <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-            <img
-              src={user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || 'User')}&backgroundColor=2A2A2A&textColor=FFFFFF`}
-              alt={user?.name}
-              className={`w-24 h-24 rounded-full object-cover ring-1 ring-[#2A2A2A] transition-all duration-200 ${isUploading ? 'opacity-50' : 'group-hover:opacity-75'}`}
-            />
+            <div className={`transition-all duration-200 ${isUploading ? 'opacity-50' : 'group-hover:opacity-75'}`}>
+              <UserAvatar user={user} className="w-24 h-24 text-3xl font-extrabold" rounded="rounded-full" />
+            </div>
             <div className="absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/40">
               {isUploading ? <Loader2 className="w-6 h-6 text-white animate-spin" /> : <Camera className="w-6 h-6 text-white" />}
             </div>

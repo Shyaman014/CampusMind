@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import CampusMindIcon from '../components/ui/CampusMindIcon';
+import BrandLogo from '../components/ui/BrandLogo';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function OAuthCallbackPage() {
@@ -44,7 +44,7 @@ export default function OAuthCallbackPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 bg-transparent">
       <div className="w-full max-w-md p-8 rounded-2xl bg-[#111111] border border-[#2A2A2A] text-center space-y-6 shadow-sm">
         <div className="flex justify-center">
-          <CampusMindIcon size={48} />
+          <BrandLogo size={56} iconSize={34} />
         </div>
 
         {error ? (

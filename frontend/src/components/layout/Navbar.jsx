@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { Bell, User, LogOut, Settings, ChevronDown } from 'lucide-react';
-import CampusMindIcon from '../ui/CampusMindIcon';
+import BrandLogo from '../ui/BrandLogo';
+import UserAvatar from '../ui/UserAvatar';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -14,11 +15,11 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-[#0B0B0B]/90 backdrop-blur-md border-b border-[#2A2A2A]/60">
       <div className="max-w-full mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-12">
+        <div className="flex items-center justify-between h-14">
 
-          <Link to="/" className="flex items-center space-x-2 sm:space-x-2.5 group min-w-0">
-            <CampusMindIcon size={26} />
-            <span className="text-[14px] sm:text-[15px] font-semibold tracking-tight text-white truncate max-w-[150px] sm:max-w-none">
+          <Link to="/" className="flex items-center space-x-3 group min-w-0">
+            <BrandLogo size={36} iconSize={22} className="group-hover:scale-105 transition-transform duration-200" />
+            <span className="text-[18px] sm:text-[20px] font-extrabold tracking-tight text-white truncate max-w-[180px] sm:max-w-none group-hover:text-indigo-300 smooth-transition">
               CampusMind AI
             </span>
           </Link>
@@ -68,11 +69,7 @@ export default function Navbar() {
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center space-x-1.5 p-1 rounded-lg hover:bg-[#1F1F1F] smooth-transition focus:outline-none"
                   >
-                    <img
-                      src={user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name)}&backgroundColor=2A2A2A&textColor=FFFFFF`}
-                      alt={user.name}
-                      className="w-7 h-7 rounded-full object-cover ring-1 ring-[#2A2A2A]"
-                    />
+                    <UserAvatar user={user} className="w-8 h-8 text-xs font-bold" rounded="rounded-full" />
                     <ChevronDown className="w-3.5 h-3.5 text-[#A1A1AA] hidden sm:block" />
                   </button>
 

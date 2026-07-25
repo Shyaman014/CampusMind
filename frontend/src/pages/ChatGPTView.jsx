@@ -2,13 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import API, { API_BASE_URL } from '../services/api';
 import ChatSidebar from '../components/chat/ChatSidebar';
 import ChatInputBar from '../components/chat/ChatInputBar';
-import { User as UserIcon, Copy, Check, FileText, Menu, ThumbsUp, ThumbsDown, Edit2, RotateCcw, Download, Code, Sparkles, BookOpen, ChevronLeft, ChevronRight, Share2 } from 'lucide-react';
+import { Copy, Check, FileText, Menu, ThumbsUp, ThumbsDown, Edit2, RotateCcw, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import CampusMindIcon from '../components/ui/CampusMindIcon';
+import BrandLogo from '../components/ui/BrandLogo';
+import UserAvatar from '../components/ui/UserAvatar';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, msg: '' }; }
@@ -62,6 +65,7 @@ const CodeBlock = ({ node, className, children }) => {
 };
 
 export default function ChatGPTView() {
+  const { user } = useAuth();
   const [chats, setChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -71,8 +75,6 @@ export default function ChatGPTView() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editValue, setEditValue] = useState('');
-  const [mode, setMode] = useState('general'); // 'general' | 'coding'
-  const [codingLang, setCodingLang] = useState('Python');
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [copiedMsgIdx, setCopiedMsgIdx] = useState(null);
   const [versionIndices, setVersionIndices] = useState({});
@@ -98,17 +100,15 @@ export default function ChatGPTView() {
       if (res.data.success) {
         const chatData = res.data.data;
         setMessages(chatData.messages || []);
-        if (chatData.mode) setMode(chatData.mode);
       }
     } catch (err) { }
   };
 
-  const handleNewChat = (newMode = 'general') => {
+  const handleNewChat = () => {
     setActiveChatId(null);
     setMessages([]);
     setStreamingContent('');
     setSidebarOpen(false);
-    setMode(newMode);
   };
 
   const handleToggleTemporary = () => {
@@ -117,12 +117,12 @@ export default function ChatGPTView() {
   };
 
   const handleDeleteChat = async (chatId) => {
-    try { await API.delete(`/chats/${chatId}`); setChats(chats.filter(c => c._id !== chatId)); if (activeChatId === chatId) handleNewChat(mode); }
+    try { await API.delete(`/chats/${chatId}`); setChats(chats.filter(c => c._id !== chatId)); if (activeChatId === chatId) handleNewChat(); }
     catch (err) { }
   };
 
   const handleClearAllChats = async () => {
-    try { for (const chat of chats) await API.delete(`/chats/${chat._id}`); setChats([]); handleNewChat(mode); }
+    try { for (const chat of chats) await API.delete(`/chats/${chat._id}`); setChats([]); handleNewChat(); }
     catch (err) { }
   };
 
@@ -180,7 +180,7 @@ export default function ChatGPTView() {
       const response = await fetch(streamUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
-        body: JSON.stringify({ chatId: isTemporary ? null : activeChatId, message: promptText, attachments, sliceIndex, mode }),
+        body: JSON.stringify({ chatId: isTemporary ? null : activeChatId, message: promptText, attachments, sliceIndex, mode: 'general' }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const reader = response.body.getReader();
@@ -284,19 +284,11 @@ export default function ChatGPTView() {
     URL.revokeObjectURL(url);
   };
 
-  const codingPrompts = [
-    { label: 'Explain Code', action: 'Explain step-by-step how this code works and its time complexity:\n\n```' + codingLang.toLowerCase() + '\n// Paste code here\n```' },
-    { label: 'Debug & Fix', action: 'Find bugs and fix syntax/logical errors in this code:\n\n```' + codingLang.toLowerCase() + '\n// Paste code here\n```' },
-    { label: 'Optimize', action: 'Optimize this code for maximum performance and readability:\n\n```' + codingLang.toLowerCase() + '\n// Paste code here\n```' },
-    { label: 'Time Complexity', action: 'Analyze the Big-O time and space complexity of this code:\n\n```' + codingLang.toLowerCase() + '\n// Paste code here\n```' },
-    { label: 'Convert to ' + codingLang, action: 'Convert this code cleanly into ' + codingLang + ':\n\n```text\n// Paste source code here\n```' }
-  ];
-
   return (
-    <div className="flex h-[calc(100vh-48px)] h-[calc(100dvh-48px)] overflow-hidden bg-[#0B0B0B] text-white">
+    <div className="flex h-[calc(100vh-56px)] h-[calc(100dvh-56px)] overflow-hidden bg-[#0B0B0B] text-white">
       <ChatSidebar
         chats={chats} activeChatId={activeChatId} onSelectChat={handleSelectChat}
-        onNewChat={() => handleNewChat(mode)} onDeleteChat={handleDeleteChat} onClearAllChats={handleClearAllChats}
+        onNewChat={() => handleNewChat()} onDeleteChat={handleDeleteChat} onClearAllChats={handleClearAllChats}
         onToggleFavorite={handleToggleFavorite} onRenameChat={handleRenameChat} onDuplicateChat={handleDuplicateChat} onArchiveChat={handleArchiveChat}
         isTemporary={isTemporary} onToggleTemporary={handleToggleTemporary} isOpen={sidebarOpen}
       />
@@ -307,49 +299,24 @@ export default function ChatGPTView() {
 
       <div className="flex-1 flex flex-col h-full relative min-w-0">
         {/* Header Bar */}
-        <div className="px-4 py-2.5 border-b border-[#2A2A2A] bg-[#111111] flex items-center justify-between z-10">
+        <div className="px-4 py-3 border-b border-[#2A2A2A] bg-[#111111] flex items-center justify-between z-10">
           <div className="flex items-center space-x-3">
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg text-[#A1A1AA] hover:text-white md:hidden">
               <Menu className="w-5 h-5" />
             </button>
             
-            {/* Mode Selector Switcher */}
-            <div className="flex items-center bg-[#181818] p-1 rounded-xl border border-[#2A2A2A]">
-              <button
-                onClick={() => setMode('general')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  mode === 'general' ? 'bg-indigo-600 text-white shadow-brandGlow' : 'text-[#A1A1AA] hover:text-white'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>AI Assistant</span>
-              </button>
-              <button
-                onClick={() => setMode('coding')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  mode === 'coding' ? 'bg-indigo-600 text-white shadow-brandGlow' : 'text-[#A1A1AA] hover:text-white'
-                }`}
-              >
-                <Code className="w-3.5 h-3.5" />
-                <span>Coding Mode</span>
-              </button>
-              <button
-                onClick={() => navigate('/learning')}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#A1A1AA] hover:text-purple-400 transition-all"
-                title="Open AI Notes & Study Synthesizer"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-purple-400" />
-                <span className="hidden sm:inline">Notes Lab</span>
-              </button>
+            <div className="flex items-center space-x-2.5">
+              <span className="text-[15px] font-bold text-white tracking-tight">CampusMind AI</span>
+              <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 text-[11px] font-bold border border-indigo-500/20 uppercase tracking-wider">v2.0</span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2.5">
             {messages.length > 0 && (
               <div className="relative">
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222] text-xs font-semibold text-slate-200 border border-[#2A2A2A] transition-all"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222] text-xs font-semibold text-slate-200 border border-[#2A2A2A] transition-all shadow-sm"
                 >
                   <Download className="w-3.5 h-3.5 text-indigo-400" />
                   <span>Export</span>
@@ -366,75 +333,36 @@ export default function ChatGPTView() {
               </div>
             )}
 
-            <button onClick={() => handleNewChat(mode)} className="p-2 rounded-xl bg-[#181818] hover:bg-[#222] text-[#A1A1AA] hover:text-white border border-[#2A2A2A]" title="New Chat">
+            <button onClick={() => handleNewChat()} className="p-2 rounded-xl bg-[#181818] hover:bg-[#222] text-[#A1A1AA] hover:text-white border border-[#2A2A2A] shadow-sm transition-colors" title="New Chat">
               <Edit2 className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Coding Mode Action Bar */}
-        {mode === 'coding' && (
-          <div className="px-4 py-2 bg-[#141414] border-b border-[#2A2A2A] flex items-center space-x-2 overflow-x-auto no-scrollbar">
-            <span className="text-[11px] font-bold uppercase text-indigo-400 mr-1 flex-shrink-0">Target Lang:</span>
-            <select
-              value={codingLang}
-              onChange={(e) => setCodingLang(e.target.value)}
-              className="bg-[#1F1F1F] text-white text-xs font-bold px-2.5 py-1 rounded-lg border border-[#3A3A3A] focus:outline-none"
-            >
-              {['Python', 'JavaScript', 'TypeScript', 'Java', 'C++', 'C#', 'Go', 'Rust', 'SQL'].map(l => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
-
-            <div className="h-4 w-px bg-[#2A2A2A] mx-1 flex-shrink-0" />
-
-            {codingPrompts.map((cp, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSendMessage(cp.action)}
-                className="px-2.5 py-1 rounded-lg bg-[#1F1F1F] hover:bg-indigo-600/20 hover:text-indigo-300 text-xs font-medium text-slate-300 border border-[#2A2A2A] flex-shrink-0 transition-all"
-              >
-                {cp.label}
-              </button>
-            ))}
-          </div>
-        )}
-
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
           {messages.length === 0 && !streamingContent ? (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-8 animate-fade-in">
-              <div className="space-y-4 flex flex-col items-center">
-                {mode === 'coding' ? (
-                  <div className="p-4 rounded-3xl bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 shadow-brandGlow">
-                    <Code className="w-12 h-12 animate-pulse" />
-                  </div>
-                ) : (
-                  <CampusMindIcon size={52} animate />
-                )}
-                <h1 className="text-3xl font-bold text-white tracking-tight">
-                  {mode === 'coding' ? 'CampusMind Coding Assistant' : 'CampusMind AI v2.0'}
+              <div className="space-y-5 flex flex-col items-center">
+                <BrandLogo size={64} iconSize={40} animate />
+                <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                  CampusMind AI v2.0
                 </h1>
-                <p className="text-[#A1A1AA] text-sm tracking-wide">
-                  {mode === 'coding' ? 'Paste your code, debug errors, analyze complexity, and generate algorithms.' : 'Your state-of-the-art AI academic assistant and research companion.'}
+                <p className="text-[#A1A1AA] text-sm max-w-md mx-auto leading-relaxed">
+                  Your state-of-the-art AI academic assistant, code analyzer, and research companion.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg px-2 sm:px-0">
-                {(mode === 'coding' ? [
-                  `Write a ${codingLang} LRU Cache implementation`,
-                  `Debug asynchronous race conditions in ${codingLang}`,
-                  `Explain dynamic programming memoization`,
-                  `Analyze Big-O time complexity of HeapSort`
-                ] : [
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full max-w-lg px-2 sm:px-0">
+                {[
                   'Explain QuickSort time complexity & code',
                   'Summarize OS paging vs segmentation',
                   'Write a React custom hook for API calls',
                   "What is Dijkstra's shortest path algorithm?"
-                ]).map((prompt, idx) => (
+                ].map((prompt, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSendMessage(prompt)}
-                    className="p-4 rounded-xl bg-[#181818] border border-[#2A2A2A] text-left text-[13px] text-[#A1A1AA] hover:text-white hover:bg-[#1F1F1F] hover:border-[#3A3A3A] hover:-translate-y-0.5 smooth-transition leading-snug shadow-sm"
+                    className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A] text-left text-[13px] text-[#A1A1AA] hover:text-white hover:bg-[#1F1F1F] hover:border-[#3A3A3A] hover:-translate-y-0.5 smooth-transition leading-snug shadow-sm"
                   >
                     {prompt}
                   </button>
@@ -442,7 +370,7 @@ export default function ChatGPTView() {
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto space-y-6 pb-4">
+            <div className="max-w-3xl mx-auto space-y-8 pb-6">
               {messages.map((msg, idx) => {
                 const isUser = msg.role === 'user';
                 const versions = msg.versions || [{ content: msg.content }];
@@ -450,18 +378,18 @@ export default function ChatGPTView() {
                 const displayContent = versions[currentVerIdx]?.content || msg.content;
 
                 return (
-                  <div key={idx} className={`flex items-start gap-3.5 ${isUser ? 'flex-row-reverse' : ''} animate-fade-in`}>
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ${
-                      isUser ? 'bg-[#2A2A2A]' : 'bg-gradient-to-br from-indigo-900/60 to-purple-900/60 border border-indigo-500/30'
-                    }`}>
-                      {isUser ? <UserIcon className="w-4 h-4 text-[#A1A1AA]" /> : <CampusMindIcon size={18} />}
-                    </div>
+                  <div key={idx} className={`flex items-start gap-4 ${isUser ? 'flex-row-reverse' : ''} animate-fade-in`}>
+                    {isUser ? (
+                      <UserAvatar user={user} className="w-8 h-8 text-xs font-bold" rounded="rounded-full" />
+                    ) : (
+                      <BrandLogo size={32} iconSize={20} />
+                    )}
 
                     <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[88%] sm:max-w-[80%] min-w-0`}>
-                      <div className={`px-4 py-3.5 rounded-2xl shadow-md ${
+                      <div className={`shadow-md ${
                         isUser
-                          ? 'bg-[#1F1F1F] text-white rounded-tr-sm border border-[#2A2A2A]'
-                          : 'bg-[#181818] text-white rounded-tl-sm border border-[#2A2A2A]'
+                          ? 'px-5 py-4 bg-[#1F1F1F] text-white rounded-3xl rounded-tr-sm border border-[#2A2A2A]'
+                          : 'px-6 py-5 bg-[#181818] text-white rounded-3xl rounded-tl-sm border border-[#2A2A2A]'
                       }`}>
                         {msg.attachments?.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mb-2.5">
@@ -506,7 +434,7 @@ export default function ChatGPTView() {
 
                       {/* Action Bar under Message */}
                       {!isStreaming && editingIndex !== idx && (
-                        <div className={`flex items-center space-x-2 mt-1.5 text-xs text-[#A1A1AA] ${isUser ? 'mr-1' : 'ml-1'}`}>
+                        <div className={`flex items-center space-x-2 mt-2.5 text-xs text-[#A1A1AA] ${isUser ? 'mr-1' : 'ml-1'}`}>
                           {isUser ? (
                             <button onClick={() => { setEditingIndex(idx); setEditValue(msg.content); }} className="flex items-center space-x-1 p-1 rounded hover:text-white transition-colors" title="Edit prompt & regenerate">
                               <Edit2 className="w-3.5 h-3.5" />
@@ -562,11 +490,9 @@ export default function ChatGPTView() {
               })}
 
               {streamingContent && (
-                <div className="flex items-start gap-3.5 animate-fade-in">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-900/60 to-purple-900/60 border border-indigo-500/30 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <CampusMindIcon size={18} animate />
-                  </div>
-                  <div className="px-4 py-3.5 rounded-2xl bg-[#181818] text-white rounded-tl-sm border border-[#2A2A2A] max-w-[88%] sm:max-w-[80%] shadow-md">
+                <div className="flex items-start gap-4 animate-fade-in">
+                  <BrandLogo size={32} iconSize={20} animate />
+                  <div className="px-6 py-5 rounded-3xl bg-[#181818] text-white rounded-tl-sm border border-[#2A2A2A] max-w-[88%] sm:max-w-[80%] shadow-md">
                     <div className="text-[14px] leading-relaxed">
                       <ErrorBoundary>
                         <div className="markdown-body">
