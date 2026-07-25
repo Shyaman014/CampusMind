@@ -9,12 +9,17 @@ const mammoth = require('mammoth');
  */
 const extractTextFromAttachment = async (attachment) => {
   try {
-    // Assuming fileUrl is like "/uploads/filename.ext"
-    const filename = path.basename(attachment.fileUrl || attachment.fileName);
+    if (attachment.extractedText && typeof attachment.extractedText === 'string' && attachment.extractedText.trim().length > 0) {
+      return attachment.extractedText;
+    }
+
+    const filename = path.basename(attachment.fileUrl || attachment.fileName || '');
+    if (!filename) return attachment.extractedText || attachment.summary || `[Attachment: ${attachment.fileName || 'file'}]`;
     const filePath = path.join(__dirname, '..', 'uploads', filename);
 
     if (!fs.existsSync(filePath)) {
-      throw new Error(`File not found on server: ${attachment.fileName}`);
+      console.warn(`[fileExtractor] File not found on disk: ${filePath}`);
+      return attachment.extractedText || attachment.summary || `[Attachment uploaded: ${attachment.fileName || filename}]`;
     }
 
     const ext = path.extname(filename).toLowerCase();
@@ -26,10 +31,15 @@ const extractTextFromAttachment = async (attachment) => {
 
     // PDF File
     if (ext === '.pdf') {
-      const pdfParse = require('pdf-parse');
-      const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdfParse(dataBuffer);
-      return data.text;
+      try {
+        const pdfParse = require('pdf-parse');
+        const dataBuffer = fs.readFileSync(filePath);
+        const data = await pdfParse(dataBuffer);
+        return data.text || `[PDF Document: ${attachment.fileName}]`;
+      } catch (pdfErr) {
+        console.warn(`[PDF Parse Warning] Failed for ${attachment.fileName}:`, pdfErr.message);
+        return attachment.extractedText || attachment.summary || `[PDF Document: ${attachment.fileName}]`;
+      }
     }
 
     // DOCX and DOC Files
@@ -53,9 +63,14 @@ const extractTextFromAttachment = async (attachment) => {
 
     // Images (OCR)
     if (ext === '.jpg' || ext === '.jpeg' || ext === '.png' || ext === '.webp') {
-      const Tesseract = require('tesseract.js');
-      const { data: { text } } = await Tesseract.recognize(filePath, 'eng');
-      return text || `[Image OCR: ${attachment.fileName}]`;
+      try {
+        const Tesseract = require('tesseract.js');
+        const { data: { text } } = await Tesseract.recognize(filePath, 'eng');
+        return text || `[Image OCR: ${attachment.fileName}]`;
+      } catch (ocrErr) {
+        console.warn(`[OCR Warning] Tesseract failed for ${attachment.fileName}:`, ocrErr.message);
+        return attachment.extractedText || attachment.summary || `[Image attachment: ${attachment.fileName}]`;
+      }
     }
 
     // Generic fallback for any other text format
@@ -65,8 +80,8 @@ const extractTextFromAttachment = async (attachment) => {
       return `Uploaded attachment: ${attachment.fileName}`;
     }
   } catch (error) {
-    console.error(`[fileExtractor] Failed to extract text from ${attachment.fileName}:`, error.message);
-    throw new Error(`Failed to extract text from ${attachment.fileName}: ${error.message}`);
+    console.warn(`[fileExtractor] Extraction fallback for ${attachment.fileName || 'file'}:`, error.message);
+    return attachment.extractedText || attachment.summary || `[Uploaded attachment: ${attachment.fileName || 'document'}]`;
   }
 };
 

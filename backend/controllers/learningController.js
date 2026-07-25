@@ -50,7 +50,10 @@ exports.uploadMaterial = async (req, res) => {
       notes: aiAnalysis.notes,
     });
 
-    return successResponse(res, 201, 'File uploaded and AI analysis complete', upload);
+    const responseData = upload.toObject ? upload.toObject() : { ...upload._doc };
+    responseData.extractedText = extractedText || aiAnalysis.summary || `[Uploaded: ${req.file.originalname}]`;
+
+    return successResponse(res, 201, 'File uploaded and AI analysis complete', responseData);
   } catch (error) {
     return errorResponse(res, 500, 'Failed to process document', error);
   }

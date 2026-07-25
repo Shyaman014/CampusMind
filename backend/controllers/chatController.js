@@ -187,11 +187,17 @@ const streamChatMessage = async (req, res, next) => {
     if (attachments && attachments.length > 0) {
       for (const att of attachments) {
         try {
-          const text = await extractTextFromAttachment(att);
+          let text = att.extractedText || att.summary || '';
+          if (!text) {
+            text = await extractTextFromAttachment(att);
+          }
           extractedText += `\n--- Document: ${att.fileName} ---\n${text}\n--- End Document ---\n`;
           enrichedAttachments.push({ ...att, extractedText: text });
         } catch (error) {
-          return res.status(400).json({ success: false, message: error.message });
+          console.warn(`[Attachment Extraction Warning] Fallback for ${att.fileName}:`, error.message);
+          const fallbackText = att.extractedText || att.summary || `[Attachment: ${att.fileName || 'document'}]`;
+          extractedText += `\n--- Document: ${att.fileName} ---\n${fallbackText}\n--- End Document ---\n`;
+          enrichedAttachments.push({ ...att, extractedText: fallbackText });
         }
       }
     }
@@ -241,9 +247,13 @@ const streamChatMessage = async (req, res, next) => {
 
     let fullAIResponse = '';
 
-    let promptText = message;
+    let promptText = message || '';
     if (extractedText) {
-      promptText = `User Question:\n"${message}"\n\nAttached Document:\n${extractedText}\n\nInstructions:\nAnswer only using the attached document when possible.`;
+      const userQ = message ? `User Question:\n"${message}"\n\n` : '';
+      promptText = `${userQ}Attached Document:\n${extractedText}\n\nInstructions:\nPlease analyze, summarize, and explain the key points of the attached document in detail. Answer using the document content when possible.`;
+    }
+    if (!promptText || promptText.trim() === '') {
+      promptText = 'Please review the uploaded material and assist me.';
     }
     if (chat.mode === 'coding' || mode === 'coding') {
       const { formatCodingAssistantPrompt } = require('../services/geminiService');

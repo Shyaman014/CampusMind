@@ -36,7 +36,7 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
             fileName: res.data.data.fileName,
             fileUrl: res.data.data.fileUrl,
             fileType: res.data.data.fileType,
-            extractedText: res.data.data.summary || ''
+            extractedText: res.data.data.extractedText || res.data.data.summary || res.data.data.fileName || ''
           }]);
         }
       } catch (err) {

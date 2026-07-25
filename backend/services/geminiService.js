@@ -10,8 +10,8 @@ const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 const callLLM = async (messages) => {
   const prompt = Array.isArray(messages)
-    ? messages.map((m) => `${m.role}: ${m.content}`).join('\n')
-    : String(messages);
+    ? messages.map((m) => `${m.role}: ${m.content}`).join('\n').trim() || 'Analyze academic topic.'
+    : String(messages || '').trim() || 'Analyze academic topic.';
 
   if (!openai) {
     const err = new Error('AI service is currently unavailable due to missing API key configuration.');
@@ -43,17 +43,19 @@ const callLLM = async (messages) => {
 
 
 const streamAIResponse = async (promptText, onChunk, conversationHistory = []) => {
-  const userQuery = promptText ? promptText.trim() : '';
+  const userQuery = promptText && promptText.trim() ? promptText.trim() : 'Please review and summarize the uploaded material.';
   
   if (!openai) {
     onChunk('⚠️ **AI service is not configured.** Please add a valid `GROQ_API_KEY` to the backend `.env` file and restart the server.');
     return;
   }
 
-  const historyMessages = conversationHistory.map((m) => ({
-    role: m.role === 'assistant' ? 'assistant' : 'user',
-    content: m.content,
-  }));
+  const historyMessages = conversationHistory
+    .filter(m => m.content && String(m.content).trim().length > 0)
+    .map((m) => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: String(m.content).trim(),
+    }));
 
   try {
     const stream = await openai.chat.completions.create({
