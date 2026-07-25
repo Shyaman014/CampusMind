@@ -59,7 +59,7 @@ export default function DashboardPage() {
       
       setIsUploading(true);
       try {
-        const uploadRes = await API.post('/learning/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        const uploadRes = await API.post('/learning/upload', formData);
         if (uploadRes.data.success) {
           const fileUrl = uploadRes.data.data.fileUrl;
           const profileRes = await API.put('/auth/profile', { avatar: fileUrl });
@@ -68,8 +68,9 @@ export default function DashboardPage() {
           }
         }
       } catch (err) {
-        // silent fail
-        alert('Failed to update profile photo.');
+        const errorMsg = err.response?.data?.message || err.message || 'Failed to update profile photo.';
+        console.error('Avatar upload error:', errorMsg);
+        alert(`Avatar upload failed: ${errorMsg}`);
       }
       setIsUploading(false);
       e.target.value = '';

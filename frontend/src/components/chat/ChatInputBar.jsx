@@ -7,6 +7,7 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -23,12 +24,13 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
     if (!filesList || filesList.length === 0) return;
     const files = Array.from(filesList);
     setUploading(true);
+    setUploadError('');
 
     for (const selectedFile of files) {
       const formData = new FormData();
       formData.append('file', selectedFile);
       try {
-        const res = await API.post('/learning/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        const res = await API.post('/learning/upload', formData);
         if (res.data.success) {
           setAttachments(prev => [...prev, {
             fileName: res.data.data.fileName,
@@ -38,8 +40,10 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
           }]);
         }
       } catch (err) {
-        console.error('File upload fallback:', err);
-        setAttachments(prev => [...prev, { fileName: selectedFile.name, fileUrl: '', fileType: selectedFile.type }]);
+        const errorMsg = err.response?.data?.message || err.message || 'File upload failed';
+        console.error('File upload error:', errorMsg);
+        setUploadError(`Failed to upload "${selectedFile.name}": ${errorMsg}`);
+        setTimeout(() => setUploadError(''), 7000);
       }
     }
     setUploading(false);
@@ -97,6 +101,15 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
         <div className="absolute inset-0 -top-12 z-50 rounded-2xl bg-indigo-950/80 border-2 border-dashed border-indigo-500 backdrop-blur-sm flex items-center justify-center space-x-2 text-white font-bold transition-all shadow-2xl animate-pulse">
           <UploadCloud className="w-6 h-6 text-indigo-400" />
           <span>Drop files here to attach to CampusMind AI</span>
+        </div>
+      )}
+
+      {uploadError && (
+        <div className="mb-2 px-3 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-xs text-rose-300 font-medium flex items-center justify-between shadow-sm">
+          <span>{uploadError}</span>
+          <button type="button" onClick={() => setUploadError('')} className="p-0.5 rounded hover:bg-rose-500/30 text-rose-300 hover:text-white smooth-transition">
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 

@@ -26,12 +26,23 @@ const errorHandler = (err, req, res, next) => {
 
   // Multer file size limit exceeded
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return errorResponse(res, 400, 'File too large. Maximum allowed file size is 10MB.');
+    const message = 'File too large. Maximum allowed file size is 10MB.';
+    console.error(`[HTTP 400 Upload Error] ${message}`);
+    return errorResponse(res, 400, message);
+  }
+
+  // Multer error or multipart parser boundary error
+  if (err.name === 'MulterError' || (err.message && (err.message.includes('Multipart') || err.message.includes('boundary') || err.message.includes('Invalid file type') || err.message.includes('Unexpected end of form')))) {
+    const message = `Upload Error (${err.name || 'MulterError'}): ${err.message}`;
+    console.error(`[HTTP 400 Upload Error] ${message}`, err);
+    return errorResponse(res, 400, message);
   }
 
   // Malformed JSON payload syntax error
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return errorResponse(res, 400, 'Invalid JSON payload format.');
+    const message = 'Invalid JSON payload format.';
+    console.error(`[HTTP 400 Error] ${message}`);
+    return errorResponse(res, 400, message);
   }
 
   return errorResponse(res, error.statusCode || 500, error.message || 'Server Error');

@@ -11,12 +11,19 @@ const API = axios.create({
   },
 });
 
-// Intercept requests to attach JWT Token from localStorage
+// Intercept requests to attach JWT Token from localStorage and handle FormData boundaries
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('campusmind_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Crucial for desktop browser compatibility (Chrome, Edge, Firefox):
+    // If sending FormData, delete explicit Content-Type so the browser XHR/fetch engine
+    // natively attaches 'multipart/form-data; boundary=----WebKitFormBoundary...'
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+      delete config.headers['content-type'];
     }
     return config;
   },

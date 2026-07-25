@@ -49,15 +49,15 @@ export default function FileUploadZone({ onUploadComplete }) {
 
     setLoading(true);
     try {
-      const res = await API.post('/learning/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const res = await API.post('/learning/upload', formData);
       if (res.data.success) {
         setFile(null);
         if (onUploadComplete) onUploadComplete(res.data.data);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'File upload and analysis failed');
+      const errorMsg = err.response?.data?.message || err.message || 'File upload and analysis failed';
+      console.error('Study pack upload error:', errorMsg);
+      setError(errorMsg);
     }
     setLoading(false);
   };

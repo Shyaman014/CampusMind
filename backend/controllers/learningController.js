@@ -10,7 +10,12 @@ const { successResponse, errorResponse } = require('../utils/apiResponse');
 exports.uploadMaterial = async (req, res) => {
   try {
     if (!req.file) {
-      return errorResponse(res, 400, 'Please upload a valid study document or image');
+      const contentType = req.headers['content-type'] || 'undefined';
+      const reason = !contentType.includes('boundary=') && contentType.includes('multipart')
+        ? `Malformed multipart/form-data header: missing boundary parameter in Content-Type "${contentType}". Do not manually set Content-Type header on client.`
+        : 'File upload missing: No file attached to FormData under field name "file" or file rejected by filter.';
+      console.error(`[Upload Error 400] ${reason}`);
+      return errorResponse(res, 400, reason);
     }
 
     const fileUrl = `/uploads/${req.file.filename}`;
