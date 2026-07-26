@@ -129,8 +129,8 @@ export default function AdminDashboardPage() {
 
       {/* Users Table */}
       {activeTab === 'users' && (
-        <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden">
-          <table className="w-full text-left border-collapse">
+        <div className="glass-card rounded-3xl border border-slate-800 overflow-x-auto max-w-full">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-bold text-slate-400 uppercase">
                 <th className="py-4 px-6">User</th>
@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
                     <select
                       value={u.role}
                       onChange={(e) => handleRoleChange(u._id, e.target.value)}
-                      className="px-2.5 py-1 text-xs bg-slate-950 border border-slate-800 rounded-lg text-indigo-300 font-bold capitalize focus:outline-none"
+                      className="px-2.5 py-1.5 min-h-[36px] text-xs bg-slate-950 border border-slate-800 rounded-lg text-indigo-300 font-bold capitalize focus:outline-none"
                     >
                       <option value="student">student</option>
                       <option value="senior">senior</option>
@@ -166,7 +166,9 @@ export default function AdminDashboardPage() {
                   <td className="py-4 px-6">
                     <button
                       onClick={() => handleDeleteUser(u._id)}
-                      className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-colors"
+                      className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-colors"
+                      title="Delete User"
+                      aria-label="Delete User"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -180,8 +182,8 @@ export default function AdminDashboardPage() {
 
       {/* Questions Cleanup Table */}
       {activeTab === 'questions' && (
-        <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden">
-          <table className="w-full text-left border-collapse">
+        <div className="glass-card rounded-3xl border border-slate-800 overflow-x-auto max-w-full">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-bold text-slate-400 uppercase">
                 <th className="py-4 px-6">Question Title</th>
@@ -199,7 +201,8 @@ export default function AdminDashboardPage() {
                   <td className="py-4 px-6">
                     <button
                       onClick={() => handleDeleteQuestion(q._id)}
-                      className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-colors flex items-center space-x-1"
+                      className="p-2 min-h-[36px] rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-colors flex items-center space-x-1"
+                      title="Delete Spam"
                     >
                       <Trash2 className="w-4 h-4" />
                       <span>Delete Spam</span>

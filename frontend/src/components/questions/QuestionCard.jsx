@@ -87,7 +87,7 @@ export default function QuestionCard({ question, onVoteUpdate }) {
       </Link>
 
       {/* Tags & Action Bar */}
-      <div className="mt-4 pt-4 border-t border-slate-800/60 flex items-center justify-between">
+      <div className="mt-4 pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5">

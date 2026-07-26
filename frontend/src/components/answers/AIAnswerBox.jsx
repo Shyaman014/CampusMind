@@ -77,7 +77,7 @@ export default function AIAnswerBox({ initialAnswer, questionTitle, questionCont
           <p className="text-xs text-slate-400">Generating {explanationLevel} level explanation with Gemini AI...</p>
         </div>
       ) : (
-        <div className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-sans mb-6">
+        <div className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-sans mb-6 overflow-x-auto break-words min-w-0">
           {content || 'AI response is loading...'}
         </div>
       )}

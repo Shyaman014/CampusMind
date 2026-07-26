@@ -48,12 +48,29 @@ textarea::-webkit-scrollbar { width: 4px; }
   color: #A1A1AA;
 }
 
-.markdown-body table { width: 100%; border-collapse: collapse; margin: 0.75em 0; }
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
 .markdown-body th, .markdown-body td {
   border: 1px solid #2A2A2A; padding: 0.45em 0.7em; text-align: left; font-size: 0.88em;
+  white-space: nowrap;
 }
 .markdown-body th { background: #181818; font-weight: 600; }
 .markdown-body td { background: #111111; }
+
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  display: block;
+  margin: 0.75em 0;
+}
 
 .markdown-body hr { border: none; border-top: 1px solid #2A2A2A; margin: 1em 0; }
 

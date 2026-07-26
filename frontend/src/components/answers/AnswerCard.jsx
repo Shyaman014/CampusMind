@@ -86,7 +86,7 @@ export default function AnswerCard({ answer, questionAuthorId, onAcceptUpdate })
     }`}>
       
       {/* Answer Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center space-x-3">
           <img
             src={authorAvatar}
@@ -118,7 +118,7 @@ export default function AnswerCard({ answer, questionAuthorId, onAcceptUpdate })
         ) : isQuestionOwner ? (
           <button
             onClick={handleAccept}
-            className="px-3 py-1.5 rounded-full bg-slate-800 hover:bg-emerald-600 hover:text-white text-emerald-400 text-xs font-semibold border border-slate-700 transition-colors flex items-center space-x-1"
+            className="px-3 py-1.5 rounded-full bg-slate-800 hover:bg-emerald-600 hover:text-white text-emerald-400 text-xs font-semibold border border-slate-700 transition-colors flex items-center space-x-1 min-h-[36px]"
           >
             <CheckCircle className="w-4 h-4" />
             <span>Mark Accepted</span>
@@ -127,12 +127,12 @@ export default function AnswerCard({ answer, questionAuthorId, onAcceptUpdate })
       </div>
 
       {/* Content */}
-      <div className="text-sm text-slate-200 leading-relaxed whitespace-pre-line mb-4 font-sans">
+      <div className="text-sm text-slate-200 leading-relaxed whitespace-pre-line mb-4 font-sans overflow-x-auto break-words min-w-0">
         {answer.content}
       </div>
 
       {/* Footer Controls: Votes & Comments */}
-      <div className="flex items-center justify-between pt-4 border-t border-slate-800/60 text-xs text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800/60 text-xs text-slate-400">
         
         <div className="flex items-center space-x-2">
           <button

@@ -95,8 +95,8 @@ export default function LeaderboardPage() {
       )}
 
       {/* Leaderboard Full Table */}
-      <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden">
-        <table className="w-full text-left border-collapse">
+      <div className="glass-card rounded-3xl border border-slate-800 overflow-x-auto max-w-full">
+        <table className="w-full text-left border-collapse min-w-[550px]">
           <thead>
             <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-bold text-slate-400 uppercase">
               <th className="py-4 px-6">Rank</th>

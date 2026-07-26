@@ -73,7 +73,7 @@ export default function QuizComponent({ quiz }) {
                     <button
                       key={optIdx}
                       onClick={() => handleOptionSelect(qIdx, optIdx)}
-                      className={`p-3 rounded-xl text-xs text-left border transition-all flex items-center justify-between ${btnStyle}`}
+                      className={`p-3 min-h-[44px] rounded-xl text-xs text-left border transition-all flex items-center justify-between gap-2 ${btnStyle}`}
                     >
                       <span>{opt}</span>
                       {submitted && optIdx === q.correctAnswer && (

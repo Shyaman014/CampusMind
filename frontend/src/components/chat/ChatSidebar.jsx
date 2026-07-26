@@ -144,14 +144,14 @@ export default function ChatSidebar({
     <aside
       className={`bg-[#111111] flex flex-col h-full transition-all duration-200 border-r border-[#2A2A2A]/40 ${
         isOpen
-          ? 'fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] shadow-2xl block md:relative md:w-[260px] md:shadow-none'
-          : 'hidden md:flex md:relative md:w-[260px]'
+          ? 'fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] shadow-2xl block lg:relative lg:w-[260px] lg:shadow-none'
+          : 'hidden lg:flex lg:relative lg:w-[260px]'
       }`}
     >
       <div className="p-4 pt-5 space-y-3.5">
         <button
           onClick={onNewChat}
-          className="w-full py-2.5 px-3 rounded-xl bg-[#1F1F1F] hover:bg-[#242424] text-white text-sm font-semibold flex items-center justify-center space-x-2 border border-[#2A2A2A] transition-all duration-200 shadow-sm hover:shadow-brandGlow hover:-translate-y-0.5"
+          className="w-full min-h-[44px] py-2.5 px-3 rounded-xl bg-[#1F1F1F] hover:bg-[#242424] text-white text-sm font-semibold flex items-center justify-center space-x-2 border border-[#2A2A2A] transition-all duration-200 shadow-sm hover:shadow-brandGlow hover:-translate-y-0.5"
         >
           <Plus className="w-4 h-4 text-indigo-400" />
           <span>New Chat</span>
@@ -176,7 +176,7 @@ export default function ChatSidebar({
 
         <button
           onClick={onToggleTemporary}
-          className={`w-full py-1.5 px-3 rounded-xl border text-xs flex items-center justify-between smooth-transition ${
+          className={`w-full min-h-[44px] py-2 px-3 rounded-xl border text-xs flex items-center justify-between smooth-transition ${
             isTemporary
               ? 'bg-white/5 border-white/20 text-white font-medium'
               : 'bg-transparent border-[#2A2A2A] text-[#A1A1AA] hover:text-white hover:border-[#3A3A3A]'

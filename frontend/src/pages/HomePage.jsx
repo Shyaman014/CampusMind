@@ -57,14 +57,14 @@ export default function HomePage() {
           <div className="flex flex-wrap gap-3 mt-5">
             <Link
               to="/ask"
-              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-brandGlow transition-all"
+              className="inline-flex items-center justify-center space-x-2 px-5 py-2.5 min-h-[44px] rounded-full text-xs font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-brandGlow transition-all"
             >
               <PlusCircle className="w-4 h-4" />
               <span>Ask a Doubt Now</span>
             </Link>
             <Link
               to="/learning"
-              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+              className="inline-flex items-center justify-center space-x-2 px-5 py-2.5 min-h-[44px] rounded-full text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
             >
               <Sparkles className="w-4 h-4 text-purple-400" />
               <span>Upload PDF Notes</span>

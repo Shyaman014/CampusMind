@@ -95,7 +95,7 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className="w-full max-w-3xl mx-auto px-2 sm:px-4 pb-3 sm:pb-4 relative"
+      className="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto px-2 sm:px-4 pb-3 sm:pb-4 relative"
     >
       {isDragging && (
         <div className="absolute inset-0 -top-12 z-50 rounded-2xl bg-indigo-950/80 border-2 border-dashed border-indigo-500 backdrop-blur-sm flex items-center justify-center space-x-2 text-white font-bold transition-all shadow-2xl animate-pulse">
@@ -107,7 +107,7 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
       {uploadError && (
         <div className="mb-2 px-3 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-xs text-rose-300 font-medium flex items-center justify-between shadow-sm">
           <span>{uploadError}</span>
-          <button type="button" onClick={() => setUploadError('')} className="p-0.5 rounded hover:bg-rose-500/30 text-rose-300 hover:text-white smooth-transition">
+          <button type="button" onClick={() => setUploadError('')} className="p-1 min-h-[32px] min-w-[32px] flex items-center justify-center rounded hover:bg-rose-500/30 text-rose-300 hover:text-white smooth-transition">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -116,10 +116,10 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-2">
           {attachments.map((att, idx) => (
-            <div key={idx} className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-[#181818] border border-[#2A2A2A] text-xs text-white">
-              <FileText className="w-3.5 h-3.5 text-indigo-400" />
+            <div key={idx} className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-[#181818] border border-[#2A2A2A] text-xs text-white">
+              <FileText className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
               <span className="truncate max-w-[120px] sm:max-w-[160px]">{att.fileName}</span>
-              <button type="button" onClick={() => removeAttachment(idx)} className="p-0.5 rounded hover:bg-[#2A2A2A] text-[#A1A1AA] hover:text-white smooth-transition">
+              <button type="button" onClick={() => removeAttachment(idx)} className="p-1 min-h-[28px] min-w-[28px] flex items-center justify-center rounded hover:bg-[#2A2A2A] text-[#A1A1AA] hover:text-white smooth-transition">
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -150,10 +150,11 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
           type="button"
           onClick={handlePlusClick}
           disabled={uploading || disabled}
-          className="p-2 sm:p-2.5 ml-1 text-[#A1A1AA] hover:text-white smooth-transition flex-shrink-0"
+          className="p-2 sm:p-2.5 ml-1 min-h-[44px] min-w-[44px] flex items-center justify-center text-[#A1A1AA] hover:text-white smooth-transition flex-shrink-0"
           title="Attach PDF, DOCX, PPT, MD, TXT, or Image"
+          aria-label="Attach files"
         >
-          {uploading ? <Loader2 className="w-[18px] h-[18px] animate-spin text-indigo-400" /> : <Paperclip className="w-[18px] h-[18px]" />}
+          {uploading ? <Loader2 className="w-5 h-5 animate-spin text-indigo-400" /> : <Paperclip className="w-5 h-5" />}
         </button>
 
         <textarea
@@ -162,14 +163,15 @@ export default function ChatInputBar({ onSendMessage, disabled, isTemporary }) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={uploading ? 'Uploading attachments...' : isTemporary ? 'Message (temporary)…' : 'Message CampusMind AI… (Drag & drop files supported)'}
-          className="flex-1 min-w-0 bg-transparent text-[13px] sm:text-[14px] text-white placeholder-[#A1A1AA]/60 py-2 sm:py-2.5 px-1 sm:px-1.5 focus:outline-none resize-none leading-normal max-h-[150px]"
+          className="flex-1 min-w-0 bg-transparent text-[13px] sm:text-[14px] text-white placeholder-[#A1A1AA]/60 py-2.5 sm:py-3 px-1 sm:px-1.5 focus:outline-none resize-none leading-normal max-h-[150px]"
           rows={1}
         />
 
         <button
           type="submit"
           disabled={(!input.trim() && attachments.length === 0) || disabled || uploading}
-          className="p-2 mr-1.5 mb-1 rounded-xl bg-white text-[#0B0B0B] disabled:opacity-20 disabled:bg-[#2A2A2A] disabled:text-[#A1A1AA] smooth-transition flex-shrink-0 hover:bg-[#E4E4E7]"
+          className="p-2 mr-1.5 mb-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-white text-[#0B0B0B] disabled:opacity-20 disabled:bg-[#2A2A2A] disabled:text-[#A1A1AA] smooth-transition flex-shrink-0 hover:bg-[#E4E4E7]"
+          aria-label="Send message"
         >
           <Send className="w-4 h-4" />
         </button>

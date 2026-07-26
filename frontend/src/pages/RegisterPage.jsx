@@ -181,12 +181,13 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 text-[14px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white placeholder-[#71717A] focus:outline-none focus:border-[#52525B] focus:ring-1 focus:ring-[#52525B] transition-all duration-150"
+                  className="w-full pl-10 pr-12 py-2.5 text-[14px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white placeholder-[#71717A] focus:outline-none focus:border-[#52525B] focus:ring-1 focus:ring-[#52525B] transition-all duration-150"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 text-[#A1A1AA] hover:text-white transition-colors"
+                  className="absolute right-2 top-1 p-2 min-h-[36px] min-w-[36px] flex items-center justify-center text-[#A1A1AA] hover:text-white transition-colors"
+                  aria-label="Toggle password visibility"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -206,12 +207,13 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 text-[14px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white placeholder-[#71717A] focus:outline-none focus:border-[#52525B] focus:ring-1 focus:ring-[#52525B] transition-all duration-150"
+                  className="w-full pl-10 pr-12 py-2.5 text-[14px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white placeholder-[#71717A] focus:outline-none focus:border-[#52525B] focus:ring-1 focus:ring-[#52525B] transition-all duration-150"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3.5 top-3 text-[#A1A1AA] hover:text-white transition-colors"
+                  className="absolute right-2 top-1 p-2 min-h-[36px] min-w-[36px] flex items-center justify-center text-[#A1A1AA] hover:text-white transition-colors"
+                  aria-label="Toggle confirm password visibility"
                 >
                   {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -227,7 +229,7 @@ export default function RegisterPage() {
                 name="department"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                className="w-full px-3 py-2.5 text-[13px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white focus:outline-none focus:border-[#52525B] transition-all duration-150 appearance-none"
+                className="w-full px-3 py-2.5 min-h-[44px] text-[13px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white focus:outline-none focus:border-[#52525B] transition-all duration-150 appearance-none"
               >
                 <option>Computer Science & Engineering</option>
                 <option>Electronics & Communication</option>
@@ -245,7 +247,7 @@ export default function RegisterPage() {
                 name="yearOfStudy"
                 value={yearOfStudy}
                 onChange={(e) => setYearOfStudy(e.target.value)}
-                className="w-full px-3 py-2.5 text-[13px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white focus:outline-none focus:border-[#52525B] transition-all duration-150 appearance-none"
+                className="w-full px-3 py-2.5 min-h-[44px] text-[13px] bg-[#161616] border border-[#2A2A2A] rounded-xl text-white focus:outline-none focus:border-[#52525B] transition-all duration-150 appearance-none"
               >
                 <option>1st Year</option>
                 <option>2nd Year</option>
@@ -259,7 +261,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl text-[14px] font-semibold bg-white text-[#0B0B0B] hover:bg-[#E4E4E7] transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 flex items-center justify-center space-x-2 mt-4 disabled:opacity-50 disabled:hover:bg-white disabled:hover:translate-y-0"
+            className="w-full min-h-[44px] py-3 rounded-xl text-[14px] font-semibold bg-white text-[#0B0B0B] hover:bg-[#E4E4E7] transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 flex items-center justify-center space-x-2 mt-4 disabled:opacity-50 disabled:hover:bg-white disabled:hover:translate-y-0"
           >
             <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
             <ArrowRight className="w-4 h-4" />
@@ -278,7 +280,7 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full py-3 px-4 rounded-xl text-[14px] font-medium bg-[#1A1A1A] border border-[#2A2A2A] text-white hover:bg-[#222222] hover:border-[#3A3A3A] transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center justify-center cursor-pointer group"
+            className="w-full min-h-[44px] py-3 px-4 rounded-xl text-[14px] font-medium bg-[#1A1A1A] border border-[#2A2A2A] text-white hover:bg-[#222222] hover:border-[#3A3A3A] transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center justify-center cursor-pointer group"
           >
             <GoogleIcon />
             <span className="group-hover:text-white transition-colors">Continue with Google</span>

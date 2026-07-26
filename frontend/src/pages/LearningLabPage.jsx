@@ -239,7 +239,7 @@ export default function LearningLabPage() {
                     </h3>
                   </div>
 
-                  <div className="prose prose-invert max-w-none text-sm text-slate-200 leading-relaxed bg-slate-950/70 p-6 rounded-2xl border border-slate-800/80 shadow-inner">
+                  <div className="prose prose-invert markdown-body max-w-none min-w-0 overflow-hidden text-sm text-slate-200 leading-relaxed bg-slate-950/70 p-4 sm:p-6 rounded-2xl border border-slate-800/80 shadow-inner">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {getActiveNotesContent()}
                     </ReactMarkdown>

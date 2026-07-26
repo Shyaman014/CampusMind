@@ -113,41 +113,41 @@ export default function DashboardPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-3 mb-1.5">
               {isEditingName ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-wrap gap-y-2">
                   <input
                     autoFocus
                     type="text"
                     value={editNameValue}
                     onChange={(e) => setEditNameValue(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') handleNameSave(); else if (e.key === 'Escape') setIsEditingName(false); }}
-                    className="px-2 py-1 bg-[#1F1F1F] border border-[#3A3A3A] rounded-lg text-white text-xl font-semibold focus:outline-none focus:border-white w-48"
+                    className="px-3 py-1.5 min-h-[40px] bg-[#1F1F1F] border border-[#3A3A3A] rounded-lg text-white text-lg sm:text-xl font-semibold focus:outline-none focus:border-white w-full max-w-[200px] sm:w-48"
                   />
-                  <button onClick={handleNameSave} className="p-1 rounded bg-[#22C55E]/20 text-[#22C55E] hover:bg-[#22C55E]/30 smooth-transition"><Check className="w-4 h-4" /></button>
-                  <button onClick={() => setIsEditingName(false)} className="p-1 rounded bg-red-400/20 text-red-400 hover:bg-red-400/30 smooth-transition"><X className="w-4 h-4" /></button>
+                  <button onClick={handleNameSave} className="p-2 min-h-[40px] min-w-[40px] flex items-center justify-center rounded bg-[#22C55E]/20 text-[#22C55E] hover:bg-[#22C55E]/30 smooth-transition" aria-label="Save name"><Check className="w-4 h-4" /></button>
+                  <button onClick={() => setIsEditingName(false)} className="p-2 min-h-[40px] min-w-[40px] flex items-center justify-center rounded bg-red-400/20 text-red-400 hover:bg-red-400/30 smooth-transition" aria-label="Cancel editing"><X className="w-4 h-4" /></button>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2 group cursor-pointer" onClick={() => { setEditNameValue(user?.name || ''); setIsEditingName(true); }}>
-                  <h1 className="text-2xl font-semibold text-white tracking-tight truncate">{user?.name}</h1>
+                  <h1 className="text-xl sm:text-2xl font-semibold text-white tracking-tight truncate max-w-[200px] sm:max-w-md">{user?.name}</h1>
                   <Edit2 className="w-4 h-4 text-[#A1A1AA] opacity-0 group-hover:opacity-100 smooth-transition" />
                 </div>
               )}
               {!isEditingName && (
-                <span className="flex-shrink-0 px-2.5 py-0.5 rounded-md bg-[#1F1F1F] text-[#A1A1AA] text-[11px] font-medium border border-[#2A2A2A] uppercase tracking-wider">
+                <span className="flex-shrink-0 px-2.5 py-0.5 rounded-md bg-[#1F1F1F] text-[#A1A1AA] text-[10px] sm:text-[11px] font-medium border border-[#2A2A2A] uppercase tracking-wider">
                   {user?.role}
                 </span>
               )}
             </div>
-            <p className="text-[13px] text-[#A1A1AA]">{user?.department} • {user?.yearOfStudy}</p>
-            <p className="text-[13px] text-[#A1A1AA] mt-0.5 truncate">"{user?.bio || 'Campus Mind Student'}"</p>
+            <p className="text-[12px] sm:text-[13px] text-[#A1A1AA] break-words">{user?.department} • {user?.yearOfStudy}</p>
+            <p className="text-[12px] sm:text-[13px] text-[#A1A1AA] mt-0.5 truncate max-w-[250px] sm:max-w-lg">"{user?.bio || 'Campus Mind Student'}"</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4 w-full md:w-auto">
-          <div className="flex-1 md:flex-none px-3 sm:px-6 py-4 rounded-xl bg-[#1F1F1F] border border-[#2A2A2A] text-center min-w-[100px] sm:min-w-[120px]">
+          <div className="flex-1 md:flex-none px-3 sm:px-6 py-4 rounded-xl bg-[#1F1F1F] border border-[#2A2A2A] text-center min-w-[80px] sm:min-w-[120px]">
             <span className="text-2xl font-semibold text-[#22C55E] block">{analytics?.reputation || 10}</span>
             <span className="text-[10px] font-medium text-[#A1A1AA] uppercase tracking-wider mt-1 block">Reputation</span>
           </div>
-          <div className="flex-1 md:flex-none px-3 sm:px-6 py-4 rounded-xl bg-[#1F1F1F] border border-[#2A2A2A] text-center min-w-[100px] sm:min-w-[120px]">
+          <div className="flex-1 md:flex-none px-3 sm:px-6 py-4 rounded-xl bg-[#1F1F1F] border border-[#2A2A2A] text-center min-w-[80px] sm:min-w-[120px]">
             <div className="flex items-center justify-center space-x-1 sm:space-x-1.5 text-xl sm:text-2xl font-semibold text-[#F59E0B]">
               <Flame className="w-4 h-4 sm:w-5 sm:h-5 fill-[#F59E0B]" />
               <span>{analytics?.streakDays || 1}d</span>

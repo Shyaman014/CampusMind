@@ -35,11 +35,11 @@ const CodeBlock = ({ node: _node, className, children }) => {
 
   if (isBlock) {
     return (
-      <div className="rounded-xl overflow-hidden bg-[#111111] border border-[#2A2A2A] my-3 shadow-md">
-        <div className="flex items-center justify-between px-4 py-1.5 bg-[#181818] border-b border-[#2A2A2A]">
+      <div className="rounded-xl overflow-x-auto max-w-full bg-[#111111] border border-[#2A2A2A] my-3 shadow-md">
+        <div className="flex items-center justify-between px-4 py-2 min-h-[40px] bg-[#181818] border-b border-[#2A2A2A]">
           <span className="text-[11px] font-semibold text-indigo-400 uppercase tracking-wider">{language}</span>
-          <button onClick={handleCopy} className="flex items-center space-x-1 text-[11px] text-[#A1A1AA] hover:text-white smooth-transition">
-            {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
+          <button onClick={handleCopy} className="flex items-center space-x-1 text-[11px] min-h-[32px] px-2 rounded text-[#A1A1AA] hover:text-white hover:bg-[#242424] smooth-transition">
+            {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copied ? 'Copied Code!' : 'Copy Code'}</span>
           </button>
         </div>
@@ -47,7 +47,7 @@ const CodeBlock = ({ node: _node, className, children }) => {
           style={vscDarkPlus}
           language={language}
           PreTag="div"
-          customStyle={{ margin: 0, padding: '0.875rem 1rem', background: 'transparent', fontSize: '13px' }}
+          customStyle={{ margin: 0, padding: '0.875rem 1rem', background: 'transparent', fontSize: '13px', overflowX: 'auto', maxWidth: '100%' }}
         >
           {String(children).replace(/\n$/, '')}
         </SyntaxHighlighter>
@@ -300,46 +300,50 @@ export default function ChatGPTView() {
       />
 
       {sidebarOpen && (
-        <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/60 z-40 md:hidden animate-fade-in" />
+        <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/60 z-40 lg:hidden animate-fade-in" />
       )}
 
       <div className="flex-1 flex flex-col h-full relative min-w-0">
         {/* Header Bar */}
-        <div className="px-4 py-3 border-b border-[#2A2A2A] bg-[#111111] flex items-center justify-between z-10">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg text-[#A1A1AA] hover:text-white md:hidden">
+        <div className="px-3 sm:px-4 py-2.5 border-b border-[#2A2A2A] bg-[#111111] flex items-center justify-between z-10 min-h-[56px]">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[#A1A1AA] hover:text-white hover:bg-[#1F1F1F] lg:hidden"
+              aria-label="Toggle sidebar menu"
+            >
               <Menu className="w-5 h-5" />
             </button>
             
-            <div className="flex items-center space-x-2.5">
-              <span className="text-[15px] font-bold text-white tracking-tight">CampusMind AI</span>
-              <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 text-[11px] font-bold border border-indigo-500/20 uppercase tracking-wider">v2.0</span>
+            <div className="flex items-center space-x-2 sm:space-x-2.5">
+              <span className="text-[15px] sm:text-[16px] font-bold text-white tracking-tight truncate">CampusMind AI</span>
+              <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 text-[10px] sm:text-[11px] font-bold border border-indigo-500/20 uppercase tracking-wider">v2.0</span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-2 sm:space-x-2.5">
             {messages.length > 0 && (
               <div className="relative">
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#181818] hover:bg-[#222] text-xs font-semibold text-slate-200 border border-[#2A2A2A] transition-all shadow-sm"
+                  className="flex items-center justify-center space-x-1.5 px-3 py-2 min-h-[40px] sm:min-h-[44px] rounded-xl bg-[#181818] hover:bg-[#222] text-xs font-semibold text-slate-200 border border-[#2A2A2A] transition-all shadow-sm"
                 >
                   <Download className="w-3.5 h-3.5 text-indigo-400" />
                   <span>Export</span>
                 </button>
 
                 {showExportMenu && (
-                  <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-[#161616] border border-[#2A2A2A] shadow-2xl py-1 z-50 animate-fade-in">
-                    <button onClick={() => handleExport('md')} className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-[#222] hover:text-white">Export as Markdown (.md)</button>
-                    <button onClick={() => handleExport('txt')} className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-[#222] hover:text-white">Export as Text (.txt)</button>
-                    <button onClick={() => handleExport('docx')} className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-[#222] hover:text-white">Export as Word (.docx)</button>
-                    <button onClick={() => handleExport('pdf')} className="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-[#222] hover:text-white">Print / Save as PDF</button>
+                  <div className="absolute right-0 mt-2 w-48 rounded-2xl bg-[#161616] border border-[#2A2A2A] shadow-2xl py-1 z-50 animate-fade-in">
+                    <button onClick={() => handleExport('md')} className="w-full text-left px-4 py-2.5 min-h-[40px] text-xs text-slate-300 hover:bg-[#222] hover:text-white">Export as Markdown (.md)</button>
+                    <button onClick={() => handleExport('txt')} className="w-full text-left px-4 py-2.5 min-h-[40px] text-xs text-slate-300 hover:bg-[#222] hover:text-white">Export as Text (.txt)</button>
+                    <button onClick={() => handleExport('docx')} className="w-full text-left px-4 py-2.5 min-h-[40px] text-xs text-slate-300 hover:bg-[#222] hover:text-white">Export as Word (.docx)</button>
+                    <button onClick={() => handleExport('pdf')} className="w-full text-left px-4 py-2.5 min-h-[40px] text-xs text-slate-300 hover:bg-[#222] hover:text-white">Print / Save as PDF</button>
                   </div>
                 )}
               </div>
             )}
 
-            <button onClick={() => handleNewChat()} className="p-2 rounded-xl bg-[#181818] hover:bg-[#222] text-[#A1A1AA] hover:text-white border border-[#2A2A2A] shadow-sm transition-colors" title="New Chat">
+            <button onClick={() => handleNewChat()} className="p-2 min-h-[40px] min-w-[40px] sm:min-h-[44px] sm:min-w-[44px] flex items-center justify-center rounded-xl bg-[#181818] hover:bg-[#222] text-[#A1A1AA] hover:text-white border border-[#2A2A2A] shadow-sm transition-colors" title="New Chat" aria-label="New Chat">
               <Edit2 className="w-4 h-4" />
             </button>
           </div>
@@ -376,7 +380,7 @@ export default function ChatGPTView() {
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto space-y-8 pb-6">
+            <div className="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-8 pb-6">
               {messages.map((msg, idx) => {
                 const isUser = msg.role === 'user';
                 const versions = msg.versions || [{ content: msg.content }];
@@ -384,18 +388,20 @@ export default function ChatGPTView() {
                 const displayContent = versions[currentVerIdx]?.content || msg.content;
 
                 return (
-                  <div key={idx} className={`flex items-start gap-4 ${isUser ? 'flex-row-reverse' : ''} animate-fade-in`}>
+                  <div key={idx} className={`flex items-start gap-3 sm:gap-4 ${isUser ? 'flex-row-reverse' : ''} animate-fade-in`}>
                     {isUser ? (
-                      <UserAvatar user={user} className="w-8 h-8 text-xs font-bold" rounded="rounded-full" />
+                      <UserAvatar user={user} className="w-8 h-8 text-xs font-bold flex-shrink-0" rounded="rounded-full" />
                     ) : (
-                      <BrandLogo size={32} iconSize={20} />
+                      <div className="flex-shrink-0">
+                        <BrandLogo size={32} iconSize={20} />
+                      </div>
                     )}
 
-                    <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[88%] sm:max-w-[80%] min-w-0`}>
-                      <div className={`shadow-md ${
+                    <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[94%] sm:max-w-[85%] md:max-w-[80%] min-w-0 w-full sm:w-auto`}>
+                      <div className={`shadow-md min-w-0 max-w-full overflow-hidden ${
                         isUser
-                          ? 'px-5 py-4 bg-[#1F1F1F] text-white rounded-3xl rounded-tr-sm border border-[#2A2A2A]'
-                          : 'px-6 py-5 bg-[#181818] text-white rounded-3xl rounded-tl-sm border border-[#2A2A2A]'
+                          ? 'px-4 sm:px-5 py-3.5 sm:py-4 bg-[#1F1F1F] text-white rounded-3xl rounded-tr-sm border border-[#2A2A2A]'
+                          : 'px-4 sm:px-6 py-4 sm:py-5 bg-[#181818] text-white rounded-3xl rounded-tl-sm border border-[#2A2A2A]'
                       }`}>
                         {msg.attachments?.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mb-2.5">
@@ -417,17 +423,17 @@ export default function ChatGPTView() {
                               rows={4}
                             />
                             <div className="flex justify-end space-x-2">
-                              <button onClick={() => setEditingIndex(null)} className="px-3 py-1.5 rounded-lg bg-[#2A2A2A] text-xs hover:bg-[#3A3A3A] transition-all">Cancel</button>
-                              <button onClick={() => submitEdit(idx)} className="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 shadow-brandGlow transition-all">Save & Regenerate</button>
+                              <button onClick={() => setEditingIndex(null)} className="px-3 py-1.5 min-h-[36px] rounded-lg bg-[#2A2A2A] text-xs hover:bg-[#3A3A3A] transition-all">Cancel</button>
+                              <button onClick={() => submitEdit(idx)} className="px-3.5 py-1.5 min-h-[36px] rounded-lg bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 shadow-brandGlow transition-all">Save & Regenerate</button>
                             </div>
                           </div>
                         ) : (
-                          <div className="text-[14px] leading-relaxed">
+                          <div className="text-[14px] leading-relaxed min-w-0 overflow-hidden">
                             {isUser ? (
-                              <div className="whitespace-pre-wrap font-sans">{displayContent}</div>
+                              <div className="whitespace-pre-wrap font-sans break-words">{displayContent}</div>
                             ) : (
                               <ErrorBoundary>
-                                <div className="markdown-body">
+                                <div className="markdown-body min-w-0 overflow-hidden">
                                   <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ code: CodeBlock }}>
                                     {displayContent}
                                   </ReactMarkdown>
@@ -442,7 +448,7 @@ export default function ChatGPTView() {
                       {!isStreaming && editingIndex !== idx && (
                         <div className={`flex items-center space-x-2 mt-2.5 text-xs text-[#A1A1AA] ${isUser ? 'mr-1' : 'ml-1'}`}>
                           {isUser ? (
-                            <button onClick={() => { setEditingIndex(idx); setEditValue(msg.content); }} className="flex items-center space-x-1 p-1 rounded hover:text-white transition-colors" title="Edit prompt & regenerate">
+                            <button onClick={() => { setEditingIndex(idx); setEditValue(msg.content); }} className="flex items-center space-x-1 p-1 min-h-[32px] rounded hover:text-white transition-colors" title="Edit prompt & regenerate">
                               <Edit2 className="w-3.5 h-3.5" />
                               <span>Edit</span>
                             </button>
@@ -450,30 +456,30 @@ export default function ChatGPTView() {
                             <div className="flex items-center space-x-2">
                               {/* Version History navigation */}
                               {versions.length > 1 && (
-                                <div className="flex items-center space-x-1 bg-[#181818] px-2 py-0.5 rounded-md border border-[#2A2A2A]">
-                                  <button onClick={() => switchVersion(idx, -1)} disabled={currentVerIdx === 0} className="hover:text-white disabled:opacity-30">
+                                <div className="flex items-center space-x-1 bg-[#181818] px-2 py-0.5 rounded-md border border-[#2A2A2A] min-h-[32px]">
+                                  <button onClick={() => switchVersion(idx, -1)} disabled={currentVerIdx === 0} className="hover:text-white disabled:opacity-30 p-1">
                                     <ChevronLeft className="w-3.5 h-3.5" />
                                   </button>
                                   <span className="text-[10px] font-bold text-slate-300">{currentVerIdx + 1} / {versions.length}</span>
-                                  <button onClick={() => switchVersion(idx, 1)} disabled={currentVerIdx === versions.length - 1} className="hover:text-white disabled:opacity-30">
+                                  <button onClick={() => switchVersion(idx, 1)} disabled={currentVerIdx === versions.length - 1} className="hover:text-white disabled:opacity-30 p-1">
                                     <ChevronRight className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
                               )}
 
-                              <button onClick={() => copyToClipboard(displayContent, idx)} className="flex items-center space-x-1 p-1 rounded hover:text-white transition-colors" title="Copy response">
+                              <button onClick={() => copyToClipboard(displayContent, idx)} className="flex items-center space-x-1 p-1.5 min-h-[32px] rounded hover:text-white transition-colors" title="Copy response">
                                 {copiedMsgIdx === idx ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
                                 {copiedMsgIdx === idx && <span className="text-green-400 font-semibold">Copied!</span>}
                               </button>
                               
-                              <button onClick={() => handleRegenerate(idx)} className="flex items-center space-x-1 p-1 rounded hover:text-white transition-colors" title="Regenerate response">
+                              <button onClick={() => handleRegenerate(idx)} className="flex items-center space-x-1 p-1.5 min-h-[32px] rounded hover:text-white transition-colors" title="Regenerate response">
                                 <RotateCcw className="w-3.5 h-3.5" />
                                 <span>Regenerate</span>
                               </button>
 
                               <button
                                 onClick={() => handleMessageFeedback(msg._id, idx, msg.feedback === 'like' ? null : 'like')}
-                                className={`p-1 rounded transition-colors ${msg.feedback === 'like' ? 'text-green-400 opacity-100 font-bold' : 'hover:text-green-400'}`}
+                                className={`p-1.5 min-h-[32px] min-w-[32px] flex items-center justify-center rounded transition-colors ${msg.feedback === 'like' ? 'text-green-400 opacity-100 font-bold' : 'hover:text-green-400'}`}
                                 title="Helpful"
                               >
                                 <ThumbsUp className={`w-3.5 h-3.5 ${msg.feedback === 'like' ? 'fill-green-400' : ''}`} />
@@ -481,7 +487,7 @@ export default function ChatGPTView() {
 
                               <button
                                 onClick={() => handleMessageFeedback(msg._id, idx, msg.feedback === 'dislike' ? null : 'dislike')}
-                                className={`p-1 rounded transition-colors ${msg.feedback === 'dislike' ? 'text-rose-400 opacity-100 font-bold' : 'hover:text-rose-400'}`}
+                                className={`p-1.5 min-h-[32px] min-w-[32px] flex items-center justify-center rounded transition-colors ${msg.feedback === 'dislike' ? 'text-rose-400 opacity-100 font-bold' : 'hover:text-rose-400'}`}
                                 title="Not Helpful"
                               >
                                 <ThumbsDown className={`w-3.5 h-3.5 ${msg.feedback === 'dislike' ? 'fill-rose-400' : ''}`} />
@@ -496,12 +502,14 @@ export default function ChatGPTView() {
               })}
 
               {streamingContent && (
-                <div className="flex items-start gap-4 animate-fade-in">
-                  <BrandLogo size={32} iconSize={20} animate />
-                  <div className="px-6 py-5 rounded-3xl bg-[#181818] text-white rounded-tl-sm border border-[#2A2A2A] max-w-[88%] sm:max-w-[80%] shadow-md">
-                    <div className="text-[14px] leading-relaxed">
+                <div className="flex items-start gap-3 sm:gap-4 animate-fade-in">
+                  <div className="flex-shrink-0">
+                    <BrandLogo size={32} iconSize={20} animate />
+                  </div>
+                  <div className="px-4 sm:px-6 py-4 sm:py-5 rounded-3xl bg-[#181818] text-white rounded-tl-sm border border-[#2A2A2A] max-w-[94%] sm:max-w-[85%] md:max-w-[80%] min-w-0 w-full sm:w-auto overflow-hidden shadow-md">
+                    <div className="text-[14px] leading-relaxed min-w-0 overflow-hidden">
                       <ErrorBoundary>
-                        <div className="markdown-body">
+                        <div className="markdown-body min-w-0 overflow-hidden">
                           <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ code: CodeBlock }}>
                             {streamingContent}
                           </ReactMarkdown>

@@ -102,7 +102,7 @@ export default function FileUploadZone({ onUploadComplete }) {
 
         <label
           htmlFor="file-upload"
-          className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 cursor-pointer border border-slate-700 transition-colors shadow-sm"
+          className="inline-flex items-center justify-center space-x-2 px-5 py-2.5 min-h-[44px] rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 cursor-pointer border border-slate-700 transition-colors shadow-sm"
         >
           {file ? (
             <>
@@ -124,7 +124,7 @@ export default function FileUploadZone({ onUploadComplete }) {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center space-x-2 px-7 py-3.5 rounded-full text-sm font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white shadow-brandGlow transition-all transform hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center space-x-2 px-7 py-3.5 min-h-[44px] w-full sm:w-auto rounded-full text-sm font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white shadow-brandGlow transition-all transform hover:-translate-y-0.5"
             >
               {loading ? (
                 <>

@@ -59,7 +59,7 @@ export default function OAuthCallbackPage() {
             </p>
             <Link
               to="/login"
-              className="inline-block w-full py-2.5 px-4 rounded-xl text-[14px] font-medium bg-white text-[#0B0B0B] hover:bg-[#E4E4E7] smooth-transition"
+              className="inline-flex items-center justify-center w-full py-2.5 px-4 min-h-[44px] rounded-xl text-[14px] font-medium bg-white text-[#0B0B0B] hover:bg-[#E4E4E7] smooth-transition"
             >
               Return to Login
             </Link>
