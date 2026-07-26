@@ -29,6 +29,7 @@
     "passport-google-oauth20": "^2.0.0",
     "pdf-parse": "^2.4.5",
     "resend": "^6.18.0",
+    "sharp": "^0.35.3",
     "socket.io": "^4.7.4",
     "tesseract.js": "^7.0.0",
     "xss-clean": "^0.1.4"

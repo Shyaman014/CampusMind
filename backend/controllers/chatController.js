@@ -1,6 +1,7 @@
 const Chat = require('../models/Chat');
-const { streamAIResponse } = require('../services/geminiService');
-const { extractTextFromAttachment } = require('../utils/fileExtractor');
+const { streamAIResponse, formatCodingAssistantPrompt } = require('../services/geminiService');
+const { extractTextFromAttachment, detectFileType } = require('../utils/fileExtractor');
+const { formatConversationHistory, buildChatPrompt } = require('../utils/promptBuilder');
 
 /**
  * Get all chat sessions for user
@@ -179,25 +180,24 @@ const setMessageFeedback = async (req, res, next) => {
 const streamChatMessage = async (req, res, next) => {
   try {
     const { chatId, message, attachments, sliceIndex, mode } = req.body;
-
     const userId = req.user._id || req.user.id || '65f1a2b3c4d5e6f7a8b9c0d1';
 
-    let extractedText = '';
     const enrichedAttachments = [];
     if (attachments && attachments.length > 0) {
       for (const att of attachments) {
         try {
+          const fileType = detectFileType(att.fileName, att.fileType);
           let text = att.extractedText;
-          if (!text || typeof text !== 'string' || text.trim().length < 10 || text.startsWith('[') || text.startsWith('Document "')) {
-            text = await extractTextFromAttachment(att);
+          if (!text || typeof text !== 'string' || text.trim().length < 5 || text.startsWith('[') || text.startsWith('Document "')) {
+            text = await extractTextFromAttachment({ ...att, fileType });
           }
           if (!text || text.trim() === '') {
             throw new Error(`No readable text could be extracted from "${att.fileName}".`);
           }
-          extractedText += `\n--- Document: ${att.fileName} ---\n${text.trim()}\n--- End Document ---\n`;
-          enrichedAttachments.push({ ...att, extractedText: text.trim() });
+          console.log(`[chatController] Attachment Processed: "${att.fileName}" | Type: "${fileType}" | Extracted Length: ${text.trim().length}`);
+          enrichedAttachments.push({ ...att, fileType, extractedText: text.trim() });
         } catch (error) {
-          console.error(`[Backend Chat Streaming Error - Extraction]:`, error.message, error.stack);
+          console.error(`[Backend Chat Streaming Error - Extraction]:`, error.message);
           return res.status(400).json({ success: false, message: error.message || 'File extraction failed.' });
         }
       }
@@ -223,22 +223,20 @@ const streamChatMessage = async (req, res, next) => {
       chat.messages = chat.messages.slice(0, sliceIndex);
     }
 
-    const conversationHistory = chat.messages.slice(-10).map((m) => {
-      let contentStr = m.content || '';
-      if (m.attachments && m.attachments.length > 0) {
-        const attSummary = m.attachments
-          .filter(a => a && a.fileName)
-          .map(a => `[Attached ${a.fileType && a.fileType.includes('image') ? 'Image' : 'Document'}: "${a.fileName}"]\nExtracted Content:\n${a.extractedText || 'No readable text'}`)
-          .join('\n\n');
-        if (attSummary) {
-          contentStr = contentStr ? `${contentStr}\n\n${attSummary}` : attSummary;
-        }
-      }
-      return {
-        role: m.role,
-        content: contentStr,
-      };
-    });
+    // Format conversation history including previous OCR text and PDF extracted text
+    const conversationHistory = formatConversationHistory(chat.messages);
+
+    // Build anti-hallucination prompt preserving uploaded file context across multi-turn conversations
+    const { promptText, logs } = buildChatPrompt(
+      message,
+      enrichedAttachments,
+      chat.messages,
+      chat.mode || mode,
+      formatCodingAssistantPrompt
+    );
+
+    console.log(`[chatController] Prompt Built | Type: "${logs.promptType}" | Current Attachments: ${logs.currentAttachmentsCount} | Past Attachment Context Included: ${logs.hasPreviousAttachmentContext ? 'YES (' + logs.previousAttachmentsCount + ')' : 'NO'}`);
+    console.log(`[chatController] Prompt Sent to Groq (Char Count: ${promptText.length}):\n---\n${promptText.slice(0, 500)}${promptText.length > 500 ? '...' : ''}\n---`);
 
     chat.messages.push({
       role: 'user',
@@ -259,35 +257,6 @@ const streamChatMessage = async (req, res, next) => {
     res.write(`data: ${JSON.stringify({ type: 'start', chatId: chat._id })}\n\n`);
 
     let fullAIResponse = '';
-
-    let promptText = message || '';
-    if (extractedText) {
-      const userQ = message ? `User Question:\n"${message}"\n\n` : '';
-      promptText = `${userQ}Attached Document Content:\n${extractedText}\n\nInstructions:\nPlease answer the user question or analyze the attached document in detail. Answer using the document content when possible.`;
-    } else if (chat && chat.messages && chat.messages.length > 0) {
-      const pastAttachments = [];
-      for (const m of chat.messages) {
-        if (m.attachments && m.attachments.length > 0) {
-          for (const att of m.attachments) {
-            if (att && att.extractedText && att.extractedText.trim() !== '' && !att.extractedText.startsWith('[')) {
-              pastAttachments.push(`[Previously Attached ${att.fileType && att.fileType.includes('image') ? 'Image' : 'Document'} in message "${m.content ? m.content.slice(0, 30) : 'upload'}": "${att.fileName}"]\nContent:\n${att.extractedText}`);
-            }
-          }
-        }
-      }
-      if (pastAttachments.length > 0) {
-        const contextStr = pastAttachments.join('\n\n--- Next Attachment ---\n\n');
-        const userQ = message ? `User Follow-up Question:\n"${message}"\n\n` : '';
-        promptText = `${userQ}Active Conversation Context (Previously Uploaded Files):\n${contextStr}\n\nInstructions:\nAnswer the user's follow-up question using the active conversation context and previously uploaded document/image content above without asking them to re-upload the file.`;
-      }
-    }
-    if (!promptText || promptText.trim() === '') {
-      promptText = 'Please review the uploaded material and assist me.';
-    }
-    if (chat.mode === 'coding' || mode === 'coding') {
-      const { formatCodingAssistantPrompt } = require('../services/geminiService');
-      promptText = formatCodingAssistantPrompt('explain', '', '', promptText);
-    }
 
     await streamAIResponse(
       promptText,

@@ -1,7 +1,7 @@
 const path = require('path');
 const Upload = require('../models/Upload');
 const { analyzeUploadedMaterial } = require('../services/geminiService');
-const { extractTextFromAttachment } = require('../utils/fileExtractor');
+const { extractTextFromAttachment, detectFileType } = require('../utils/fileExtractor');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
 // @desc    Upload file & auto-generate learning materials (Summary, Flashcards, Quiz, Notes)
@@ -19,22 +19,22 @@ exports.uploadMaterial = async (req, res) => {
     }
 
     const fileUrl = `/uploads/${req.file.filename}`;
-    const ext = path.extname(req.file.originalname || '').toLowerCase();
-    
-    let fileType = 'doc';
-    if (ext === '.pdf' || req.file.mimetype === 'application/pdf') fileType = 'pdf';
-    else if (['.jpg', '.jpeg', '.png', '.webp'].includes(ext) || req.file.mimetype?.startsWith('image/')) fileType = 'image';
-    else if (['.ppt', '.pptx'].includes(ext)) fileType = 'ppt';
-    else if (['.md', '.txt'].includes(ext)) fileType = 'txt';
-    else if (['.doc', '.docx'].includes(ext)) fileType = 'docx';
+    const fileType = detectFileType(req.file.originalname, req.file.mimetype);
 
     let extractedText = '';
     try {
-      extractedText = await extractTextFromAttachment({ fileName: req.file.originalname, fileUrl });
+      extractedText = await extractTextFromAttachment({ 
+        fileName: req.file.originalname, 
+        fileUrl, 
+        fileType, 
+        mimetype: req.file.mimetype 
+      });
     } catch (err) {
-      console.error('[Backend Upload Error - Text Extraction]:', err.message, err.stack);
-      return errorResponse(res, 400, err.message || 'PDF extraction failed.');
+      console.error('[Backend Upload Error - Text Extraction]:', err.message);
+      return errorResponse(res, 400, err.message || 'File extraction failed.');
     }
+
+    console.log(`[learningController] File Uploaded: "${req.file.originalname}" | Type: "${fileType}" | Extracted Char Count: ${extractedText ? extractedText.length : 0}`);
 
     // Invoke Gemini AI to extract key insights, flashcards, quiz, summary, and 4-tier notes
     const aiAnalysis = await analyzeUploadedMaterial(req.file.originalname, extractedText);
@@ -44,6 +44,7 @@ exports.uploadMaterial = async (req, res) => {
       fileName: req.file.originalname,
       fileUrl,
       fileType,
+      extractedText: extractedText || '',
       summary: aiAnalysis.summary,
       importantPoints: aiAnalysis.importantPoints,
       flashcards: aiAnalysis.flashcards,

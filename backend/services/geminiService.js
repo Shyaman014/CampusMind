@@ -134,6 +134,21 @@ const generateRelatedQuestions = async (title, content) => {
 
 const analyzeUploadedMaterial = async (fileName, extractedText = '') => {
   try {
+    if (typeof extractedText === 'string' && extractedText.includes('does not contain enough readable text')) {
+      return {
+        summary: `The uploaded image "${fileName}" does not contain enough readable text for analysis. Visual information cannot be interpreted from OCR alone.`,
+        importantPoints: ['No readable text could be extracted from this image', 'The image appears to contain mostly graphics or low-contrast text'],
+        flashcards: [{ front: `Why couldn't "${fileName}" be analyzed?`, back: 'The image did not contain sufficient readable text for OCR extraction.' }],
+        quiz: [],
+        interviewQuestions: [],
+        notes: {
+          detailed: `# Analysis of "${fileName}"\n\nThis image does not contain enough readable text for analysis. Visual information cannot be interpreted from OCR alone.`,
+          short: `# Short Notes\n\n- No readable text in "${fileName}".`,
+          exam: `# Exam Notes\n\n- No text extracted from image.`,
+          revision: `# Revision\n\n- Unreadable image content.`
+        }
+      };
+    }
     const textSnippet = extractedText ? `\n\nDocument Text Content (excerpt):\n"${extractedText.slice(0, 8000)}"\n` : '';
     const prompt = `A student uploaded a study document named "${fileName}".${textSnippet}
 Based on the document name and content, generate a comprehensive academic analysis and 4-tier notes in the following JSON format (return ONLY valid JSON, no other text):

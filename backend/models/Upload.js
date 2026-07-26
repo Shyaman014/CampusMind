@@ -29,8 +29,12 @@ const UploadSchema = new mongoose.Schema(
     },
     fileType: {
       type: String,
-      enum: ['pdf', 'image', 'doc', 'docx', 'txt', 'md', 'ppt', 'pptx'],
+      enum: ['pdf', 'image', 'doc', 'docx', 'txt', 'md', 'markdown', 'ppt', 'pptx', 'other'],
       required: true,
+    },
+    extractedText: {
+      type: String,
+      default: '',
     },
     summary: {
       type: String,
