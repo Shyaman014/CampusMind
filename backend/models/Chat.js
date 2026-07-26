@@ -15,6 +15,7 @@ const messageSchema = new mongoose.Schema({
       fileName: String,
       fileUrl: String,
       fileType: String,
+      documentType: String,
       extractedText: String,
       visionText: String,
       parsedContent: String,

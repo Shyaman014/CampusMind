@@ -29,8 +29,8 @@ const formatConversationHistory = (messages = []) => {
         .filter(a => a && (a.fileName || a.extractedText || a.visionText || a.parsedContent))
         .map(a => {
           const isImg = isImageAttachment(a.fileType, a.fileName);
-          const typeLabel = isImg ? 'Image (Gemini Vision Extraction)' : `Document (${(a.fileType || 'file').toUpperCase()})`;
-          const content = a.extractedText || a.visionText || a.parsedContent || 'No readable text available.';
+          const typeLabel = isImg ? `Image (Gemini Vision ${a.documentType || 'Extraction'})` : `Document (${(a.fileType || 'file').toUpperCase()})`;
+          const content = a.parsedContent || a.extractedText || a.visionText || 'No readable text available.';
           return `[Attached ${typeLabel}: "${a.fileName || 'unknown'}"]\nContent:\n${content}`;
         })
         .join('\n\n');
@@ -70,31 +70,25 @@ const buildChatPrompt = (message = '', currentAttachments = [], chatHistory = []
     const hasImage = currentAttachments.some(att => isImageAttachment(att.fileType, att.fileName));
     const attachmentsContent = currentAttachments
       .map(att => {
-        const content = att.extractedText || att.visionText || att.parsedContent || 'No readable content found.';
-        return `--- Attachment (${att.fileType || 'file'}): ${att.fileName} ---\n${content}\n--- End Attachment ---`;
+        const content = att.parsedContent || att.extractedText || att.visionText || 'No readable content found.';
+        return `--- Structured Extraction (${att.documentType || att.fileType || 'file'}): ${att.fileName} ---\n${content}\n--- End Extraction ---`;
       })
       .join('\n\n');
 
     if (hasImage) {
       logs.promptType = 'current_image_vision';
       const userQ = message && message.trim() ? `\n\nUser Question/Instruction:\n"${message.trim()}"` : '';
-      promptText = `You are an expert university professor and senior academic evaluator.
-The following exam paper, questions, or diagram has already been extracted from an uploaded image.
-Solve every question completely.
+      promptText = `You are an expert university professor, senior academic evaluator, and reasoning engine.
+An uploaded image has already been classified and parsed into a strict structured extraction (JSON/Markdown) by an advanced OCR and document parser.
 
-Extracted Image Content (Structured Markdown):
 ${attachmentsContent}${userQ}
 
-Rules:
-- Preserve exact question numbering and sub-parts.
-- Do not skip any questions or sub-questions; answer every sub-question separately.
-- Show all mathematical steps, formulas, and calculations clearly.
-- Draw ASCII diagrams or flowcharts where possible to illustrate concepts.
-- If a diagram description exists in the extracted text, use it to explain or solve the problem.
-- If part of the question or text is marked [UNCLEAR], tell the user exactly which part is unreadable and solve whatever is clearly legible.
-- Never invent missing information or guess unreadable numbers/symbols.
-- Format your response to be exam-ready, structured, easy to read, and use bullet points where appropriate.
-- Avoid unnecessary programming code unless explicitly asked, and avoid generic filler text.`;
+CRITICAL REASONING & SOLVING MANDATES:
+1. SOLVE ONLY WHAT EXISTS INSIDE THE EXTRACTION: You must solve and explain ONLY the questions, equations, and data explicitly present in the structured extraction above.
+2. NEVER GUESS UNREADABLE TEXT: Never allow yourself to guess, infer, or hallucinate missing words, numbers, symbols, or equations. If any part of the text or question is marked [UNCLEAR], explicitly inform the user which specific part or variable is unreadable and solve only the clearly legible portions.
+3. PRESERVE EXACT STRUCTURE: Preserve exact question numbering, sub-question labels, marks, mathematical notation, Boolean expressions, and logic symbols exactly as given in the extraction.
+4. DIAGRAM RECONSTRUCTION: For any question that references a diagram or has a diagram description in the "diagrams" region, use the description to explain the concepts and reconstruct clear ASCII diagrams or flowcharts in your solution.
+5. EXAM-READY FORMATTING: Provide structured, exam-ready, professional answers with clear bullet points, step-by-step mathematical calculations, and avoid generic filler or unnecessary code unless requested. Answer every sub-question separately.`;
     } else {
       logs.promptType = 'current_document_text';
       const userQ = message && message.trim() ? `User Question:\n"${message.trim()}"\n\n` : '';
@@ -107,12 +101,12 @@ Rules:
     for (const m of chatHistory) {
       if (m.attachments && m.attachments.length > 0) {
         for (const att of m.attachments) {
-          const textContent = att.extractedText || att.visionText || att.parsedContent || '';
+          const textContent = att.parsedContent || att.extractedText || att.visionText || '';
           if (textContent && typeof textContent === 'string' && textContent.trim() !== '' && !textContent.startsWith('[')) {
             const isImg = isImageAttachment(att.fileType, att.fileName);
             pastAttachmentsList.push({
               isImage: isImg,
-              text: `[Previously Attached ${isImg ? 'Image (Gemini Vision Extraction)' : 'Document (' + (att.fileType || 'file').toUpperCase() + ' Content)'} in message "${m.content ? m.content.slice(0, 30) : 'upload'}": "${att.fileName}"]\nContent:\n${textContent.trim()}`
+              text: `[Previously Attached ${isImg ? 'Image (Gemini Vision ' + (att.documentType || 'Extraction') + ')' : 'Document (' + (att.fileType || 'file').toUpperCase() + ' Content)'} in message "${m.content ? m.content.slice(0, 30) : 'upload'}": "${att.fileName}"]\nContent:\n${textContent.trim()}`
             });
           }
         }
@@ -128,24 +122,20 @@ Rules:
       if (hasPrevImage) {
         logs.promptType = 'followup_image_vision';
         const userQ = message && message.trim() ? message.trim() : 'Please continue solving or explaining.';
-        promptText = `You are an expert university professor and senior academic evaluator.
-An exam paper or image was previously uploaded by the user, and its exact content was extracted into structured Markdown.
+        promptText = `You are an expert university professor, senior academic evaluator, and reasoning engine.
+An exam paper or image was previously uploaded by the user, and its content was classified and parsed into a strict structured extraction (JSON/Markdown).
 
-Active Conversation Context (Previously Extracted Image/Document Content):
+Active Conversation Context (Previously Stored Image/Document Extractions):
 ${pastContextStr}
 
 User Follow-up Question/Instruction:
 "${userQ}"
 
-Instructions:
-Answer the user's follow-up question using the stored image extraction/document content above without asking them to re-upload the image or file.
-Rules:
-- Maintain exam-ready, structured, and easy-to-read formatting with bullet points and clear headings.
-- Show calculations and draw ASCII diagrams where possible.
-- If referencing a diagram description from the extraction, explain it clearly.
-- If referencing text marked [UNCLEAR], remind the user which part was unreadable.
-- Never invent missing information or hallucinate contents not present in the extraction.
-- Answer every sub-question separately and avoid unnecessary programming code unless asked.`;
+CRITICAL REASONING & SOLVING MANDATES:
+1. SOLVE ONLY WHAT EXISTS INSIDE THE EXTRACTION: Answer the user's follow-up question using ONLY the stored structured extraction above without asking them to re-upload the file.
+2. NEVER GUESS UNREADABLE TEXT: Do not guess, infer, or hallucinate any unreadable text or numbers marked [UNCLEAR]. Remind the user if a required variable was unreadable.
+3. DIAGRAM RECONSTRUCTION: Use any stored diagram descriptions in the extraction to reconstruct ASCII diagrams or explain circuitry/flowcharts clearly.
+4. EXAM-READY FORMATTING: Maintain step-by-step calculations, bullet points, and clear academic structure. Answer every sub-question separately.`;
       } else {
         logs.promptType = 'followup_document_text';
         const userQ = message && message.trim() ? `User Follow-up Question:\n"${message.trim()}"\n\n` : '';

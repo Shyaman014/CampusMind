@@ -22,32 +22,47 @@ exports.uploadMaterial = async (req, res) => {
     const fileType = detectFileType(req.file.originalname, req.file.mimetype);
 
     let extractedText = '';
+    let extractedResult = '';
+    let markdownText = '';
+    let jsonText = '';
+    let docClass = fileType;
+
     try {
-      extractedText = await extractTextFromAttachment({ 
+      extractedResult = await extractTextFromAttachment({ 
         fileName: req.file.originalname, 
         fileUrl, 
         fileType, 
         mimetype: req.file.mimetype,
         userPrompt: req.body.prompt || req.body.message || ''
       });
+      if (typeof extractedResult === 'object' && extractedResult !== null) {
+        markdownText = extractedResult.markdown || extractedResult.text || '';
+        jsonText = extractedResult.json || JSON.stringify(extractedResult, null, 2);
+        docClass = extractedResult.documentType || fileType;
+      } else {
+        markdownText = typeof extractedResult === 'string' ? extractedResult : String(extractedResult || '');
+        jsonText = markdownText;
+        docClass = fileType;
+      }
     } catch (err) {
       console.error('[Backend Upload Error - Text Extraction]:', err.message);
       return errorResponse(res, 400, err.message || 'File extraction failed.');
     }
 
-    console.log(`[learningController] File Uploaded: "${req.file.originalname}" | Type: "${fileType}" | Extracted Char Count: ${extractedText ? extractedText.length : 0}`);
+    console.log(`[learningController] File Uploaded: "${req.file.originalname}" | Type: "${fileType}" | Class: "${docClass}" | Extracted Char Count: ${markdownText.length}`);
 
     // Invoke Gemini AI to extract key insights, flashcards, quiz, summary, and 4-tier notes
-    const aiAnalysis = await analyzeUploadedMaterial(req.file.originalname, extractedText);
+    const aiAnalysis = await analyzeUploadedMaterial(req.file.originalname, markdownText);
 
     const upload = await Upload.create({
       user: req.user._id,
       fileName: req.file.originalname,
       fileUrl,
       fileType,
-      extractedText: extractedText || '',
-      visionText: fileType === 'image' ? (extractedText || '') : '',
-      parsedContent: fileType === 'image' ? (extractedText || '') : '',
+      documentType: docClass,
+      extractedText: markdownText || '',
+      visionText: fileType === 'image' ? (markdownText || '') : '',
+      parsedContent: fileType === 'image' ? (jsonText || '') : '',
       summary: aiAnalysis.summary,
       importantPoints: aiAnalysis.importantPoints,
       flashcards: aiAnalysis.flashcards,
@@ -56,9 +71,10 @@ exports.uploadMaterial = async (req, res) => {
     });
 
     const responseData = upload.toObject ? upload.toObject() : { ...upload._doc };
-    responseData.extractedText = extractedText;
-    responseData.visionText = fileType === 'image' ? (extractedText || '') : '';
-    responseData.parsedContent = fileType === 'image' ? (extractedText || '') : '';
+    responseData.extractedText = markdownText;
+    responseData.visionText = fileType === 'image' ? (markdownText || '') : '';
+    responseData.parsedContent = fileType === 'image' ? (jsonText || '') : '';
+    responseData.documentType = docClass;
 
     return successResponse(res, 201, 'File uploaded and AI analysis complete', responseData);
   } catch (error) {

@@ -63,8 +63,9 @@ const preprocessImageForOcr = async (filePath) => {
 
 /**
  * Extracts text from a local file attachment. Uses Gemini Vision for images with OCR fallback.
+ * For images, returns a structured extraction object containing documentType, markdown, and json.
  * @param {Object} attachment - The attachment object containing { fileName, fileUrl, fileType, mimetype, userPrompt }
- * @returns {Promise<string>} The extracted text or vision description
+ * @returns {Promise<string|Object>} The extracted text string (for documents) or structured extraction object (for images)
  */
 const extractTextFromAttachment = async (attachment) => {
   try {
@@ -162,10 +163,10 @@ const extractTextFromAttachment = async (attachment) => {
     if (fileType === 'image') {
       try {
         const { analyzeImage } = require('../services/visionService');
-        const visionDescription = await analyzeImage(filePath, attachment.userPrompt || '');
-        if (visionDescription && visionDescription.trim().length >= 10) {
-          console.log(`[fileExtractor] Image successfully analyzed by Gemini Vision | Filename: "${filename}" | Char Count: ${visionDescription.length}`);
-          return visionDescription.trim();
+        const visionResult = await analyzeImage(filePath, attachment.userPrompt || '');
+        if (visionResult && (visionResult.markdown || visionResult.text)) {
+          console.log(`[fileExtractor] Image successfully extracted by Gemini Vision | Filename: "${filename}" | Classification: ${visionResult.documentType}`);
+          return visionResult;
         }
       } catch (visionErr) {
         console.warn(`[fileExtractor] Gemini Vision failed for "${filename}", falling back to OCR pipeline:`, visionErr.message);
@@ -182,21 +183,52 @@ const extractTextFromAttachment = async (attachment) => {
 
         if (!cleanOcr || cleanOcr.length < 5) {
           console.log(`[fileExtractor OCR] Filename: "${filename}" | File Type: "image" | OCR Success: false | OCR Confidence: ${confidence !== null ? confidence.toFixed(2) + '%' : 'N/A'} | Extracted Char Count: ${cleanOcr.length} | Reason: No readable text / mostly graphics`);
-          return "This image does not contain enough readable text for analysis. (This image appears to contain mostly graphics or no readable text.)";
+          const fallbackMsg = "This image does not contain enough readable text for analysis. (This image appears to contain mostly graphics or no readable text.)";
+          return {
+            documentType: 'general_image',
+            markdown: fallbackMsg,
+            questions: [],
+            diagrams: [],
+            json: JSON.stringify({ documentType: 'general_image', markdown: fallbackMsg, questions: [], diagrams: [] }, null, 2),
+            text: fallbackMsg
+          };
         }
 
         if (confidence !== null && confidence < 45) {
           console.log(`[fileExtractor OCR] Filename: "${filename}" | File Type: "image" | OCR Success: false | OCR Confidence: ${confidence.toFixed(2)}% | Extracted Char Count: ${cleanOcr.length} | Reason: OCR confidence is too low`);
-          return "This image does not contain enough readable text for analysis. (OCR confidence is too low.)";
+          const fallbackMsg = "This image does not contain enough readable text for analysis. (OCR confidence is too low.)";
+          return {
+            documentType: 'general_image',
+            markdown: fallbackMsg,
+            questions: [],
+            diagrams: [],
+            json: JSON.stringify({ documentType: 'general_image', markdown: fallbackMsg, questions: [], diagrams: [] }, null, 2),
+            text: fallbackMsg
+          };
         }
 
         if (cleanOcr.length < 15) {
           console.log(`[fileExtractor OCR] Filename: "${filename}" | File Type: "image" | OCR Success: false | OCR Confidence: ${confidence !== null ? confidence.toFixed(2) + '%' : 'N/A'} | Extracted Char Count: ${cleanOcr.length} | Reason: Extracted text is too short`);
-          return "This image does not contain enough readable text for analysis.";
+          const fallbackMsg = "This image does not contain enough readable text for analysis.";
+          return {
+            documentType: 'general_image',
+            markdown: fallbackMsg,
+            questions: [],
+            diagrams: [],
+            json: JSON.stringify({ documentType: 'general_image', markdown: fallbackMsg, questions: [], diagrams: [] }, null, 2),
+            text: fallbackMsg
+          };
         }
 
         console.log(`[fileExtractor OCR] Filename: "${filename}" | File Type: "image" | OCR Success: true | OCR Confidence: ${confidence !== null ? confidence.toFixed(2) + '%' : 'N/A'} | Extracted Char Count: ${cleanOcr.length}`);
-        return cleanOcr;
+        return {
+          documentType: 'general_image',
+          markdown: cleanOcr,
+          questions: [],
+          diagrams: [],
+          json: JSON.stringify({ documentType: 'general_image', markdown: cleanOcr, questions: [], diagrams: [] }, null, 2),
+          text: cleanOcr
+        };
       } catch (ocrErr) {
         console.error('[Backend OCR Error]:', ocrErr.message, ocrErr.stack);
         console.log(`[fileExtractor OCR] Filename: "${filename}" | File Type: "image" | OCR Success: false | Error: ${ocrErr.message}`);

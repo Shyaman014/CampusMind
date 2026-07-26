@@ -187,21 +187,40 @@ const streamChatMessage = async (req, res, next) => {
       for (const att of attachments) {
         try {
           const fileType = detectFileType(att.fileName, att.fileType);
-          let text = att.extractedText || att.visionText;
-          if (!text || typeof text !== 'string' || text.trim().length < 5 || text.startsWith('[') || text.startsWith('Document "')) {
-            text = await extractTextFromAttachment({ ...att, fileType, userPrompt: message });
+          let extracted = att.extractedText || att.visionText;
+          let markdownText = '';
+          let jsonText = '';
+          let docClass = att.documentType || 'document';
+
+          if (!extracted || typeof extracted !== 'string' || extracted.trim().length < 5 || extracted.startsWith('[') || extracted.startsWith('Document "')) {
+            const extractResult = await extractTextFromAttachment({ ...att, fileType, userPrompt: message });
+            if (typeof extractResult === 'object' && extractResult !== null) {
+              markdownText = extractResult.markdown || extractResult.text || '';
+              jsonText = extractResult.json || JSON.stringify(extractResult, null, 2);
+              docClass = extractResult.documentType || fileType;
+            } else {
+              markdownText = typeof extractResult === 'string' ? extractResult : String(extractResult || '');
+              jsonText = markdownText;
+              docClass = fileType;
+            }
+          } else {
+            markdownText = att.extractedText || att.visionText || '';
+            jsonText = att.parsedContent || att.visionText || markdownText;
+            docClass = att.documentType || fileType;
           }
-          if (!text || text.trim() === '') {
+
+          if (!markdownText || markdownText.trim() === '') {
             throw new Error(`No readable text could be extracted from "${att.fileName}".`);
           }
-          console.log(`[chatController] Attachment Processed: "${att.fileName}" | Type: "${fileType}" | Extracted Length: ${text.trim().length}`);
+          console.log(`[chatController] Attachment Processed: "${att.fileName}" | Type: "${fileType}" | Class: "${docClass}" | Extracted Length: ${markdownText.trim().length}`);
           const isImg = fileType === 'image';
           enrichedAttachments.push({
             ...att,
             fileType,
-            extractedText: text.trim(),
-            visionText: isImg ? text.trim() : (att.visionText || ''),
-            parsedContent: isImg ? text.trim() : (att.parsedContent || ''),
+            documentType: docClass,
+            extractedText: markdownText.trim(),
+            visionText: isImg ? markdownText.trim() : (att.visionText || ''),
+            parsedContent: isImg ? jsonText.trim() : (att.parsedContent || ''),
           });
         } catch (error) {
           console.error(`[Backend Chat Streaming Error - Extraction]:`, error.message);
