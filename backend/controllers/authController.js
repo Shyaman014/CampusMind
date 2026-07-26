@@ -44,7 +44,23 @@ exports.register = async (req, res) => {
       });
     }
 
-    const token = generateToken(user._id);
+    const token = generateToken(user._id, '30d');
+    const refreshToken = generateToken.generateRefreshToken(user._id, '30d');
+    const expiresAtMs = 30 * 24 * 60 * 60 * 1000;
+    user.refreshTokens.push({
+      token: refreshToken,
+      expiresAt: new Date(Date.now() + expiresAtMs),
+      deviceInfo: req.headers['user-agent'] || 'unknown',
+      isValid: true,
+    });
+    await user.save({ validateBeforeSave: false });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: expiresAtMs,
+    });
 
     return successResponse(res, 201, 'User registered successfully', {
       user: {
@@ -58,6 +74,7 @@ exports.register = async (req, res) => {
         emailVerified: user.emailVerified,
       },
       token,
+      refreshToken,
     });
   } catch (error) {
     return errorResponse(res, 500, 'Error registering user', error);
@@ -127,11 +144,12 @@ exports.login = async (req, res) => {
     user.lastLogin = now;
     user.rememberMe = !!rememberMe;
 
-    const accessToken = generateToken(user._id, '15m');
-    const refreshDuration = rememberMe ? '30d' : '24h';
+    const duration = rememberMe ? '30d' : '7d';
+    const accessToken = generateToken(user._id, duration);
+    const refreshDuration = rememberMe ? '30d' : '7d';
     const refreshToken = generateToken.generateRefreshToken(user._id, refreshDuration);
 
-    const expiresAtMs = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+    const expiresAtMs = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
     user.refreshTokens.push({
       token: refreshToken,
       expiresAt: new Date(Date.now() + expiresAtMs),
@@ -285,7 +303,7 @@ exports.resetPassword = async (req, res) => {
     user.passwordResetExpire = undefined;
     await user.save();
 
-    const token = generateToken(user._id, '15m');
+    const token = generateToken(user._id, '30d');
 
     return successResponse(res, 200, 'Password reset successful', { token });
   } catch (error) {
@@ -301,7 +319,7 @@ exports.oauthSuccessRedirect = async (req, res) => {
     if (!req.user) {
       return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=OAuthFailed`);
     }
-    const token = generateToken(req.user._id, '15m');
+    const token = generateToken(req.user._id, '30d');
     const refreshToken = generateToken.generateRefreshToken(req.user._id, '30d');
     
     req.user.refreshTokens.push({
@@ -361,11 +379,12 @@ exports.refreshToken = async (req, res) => {
 
     // Token rotation
     user.refreshTokens[tokenIndex].isValid = false;
-    const newAccessToken = generateToken(user._id, '15m');
-    const refreshDuration = user.rememberMe ? '30d' : '24h';
+    const duration = user.rememberMe ? '30d' : '7d';
+    const newAccessToken = generateToken(user._id, duration);
+    const refreshDuration = user.rememberMe ? '30d' : '7d';
     const newRefreshToken = generateToken.generateRefreshToken(user._id, refreshDuration);
 
-    const expiresAtMs = user.rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+    const expiresAtMs = user.rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
     user.refreshTokens.push({
       token: newRefreshToken,
       expiresAt: new Date(Date.now() + expiresAtMs),

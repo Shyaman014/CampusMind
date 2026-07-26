@@ -4,7 +4,8 @@
 
 ![CampusMind AI](https://img.shields.io/badge/CampusMind-AI%20v2.0-000000?style=for-the-badge&logo=openai&logoColor=white)
 ![MERN Stack](https://img.shields.io/badge/Stack-MERN-000000?style=for-the-badge&logo=mongodb&logoColor=white)
-![Google Gemini](https://img.shields.io/badge/Powered%20By-Google%20Gemini-000000?style=for-the-badge&logo=google&logoColor=white)
+![Groq AI](https://img.shields.io/badge/Chat%20AI-Groq%20Llama%203.3-000000?style=for-the-badge&logo=meta&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Vision%20AI-Gemini%202.5%20Flash-000000?style=for-the-badge&logo=google&logoColor=white)
 ![Production Ready](https://img.shields.io/badge/Production-Ready%20%E2%9C%93-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-000000?style=for-the-badge)
 
@@ -20,7 +21,7 @@
 
 **CampusMind AI** is an advanced academic learning platform built on a modern, scalable MERN (MongoDB, Express.js, React, Node.js) architecture. It serves as a centralized AI tutor, coding lab, and study pack synthesizer that elevates standard LLM interactions into specialized educational tools. 
 
-Featuring real-time AI response streaming, multi-format document OCR extraction, interactive algorithm debugging, and gamified student streak tracking, CampusMind AI delivers a premium, distraction-free learning experience wrapped in a sleek, high-contrast dark theme.
+Featuring real-time Groq AI (`llama-3.3-70b-versatile`) response streaming, Gemini 2.5 Flash multimodal vision parsing, interactive algorithm debugging, and gamified student streak tracking, CampusMind AI delivers a premium, distraction-free learning experience wrapped in a sleek, high-contrast dark theme.
 
 ---
 
@@ -28,6 +29,7 @@ Featuring real-time AI response streaming, multi-format document OCR extraction,
 
 CampusMind AI has undergone a rigorous **Staff Engineer Production Audit** across 8 architectural layers (Frontend, Backend, Database, Security, Performance, UI/UX, Deployment, and Code Quality) to ensure enterprise stability:
 
+- 🔐 **Hardened Session Persistence**: Zero-flicker session restoration with 30-day JWT access & refresh token rotation, multi-layer fallback headers (`x-refresh-token`), and instant local profile preloading that survives browser restarts, refreshes, and multi-tab workflows.
 - 💎 **Zero-Defect Code Quality**: Clean codebase adhering to strict React 18 / Vite ESLint standards (**0 errors, 0 warnings** across all pages and components).
 - ⚡ **Vite Multi-Chunk Optimization**: Explicit Rollup vendor chunk splitting (`vendor`, `ui`, `markdown`) to optimize browser caching, eliminate bundle size warnings, and achieve ultra-fast page load times.
 - 🧠 **Native Memory & Open Handle Optimization**: Re-architected PDF and OCR vision engines (`pdf-parse`, `tesseract.js`) with dynamic lazy-loading. This eliminates native `@napi-rs/canvas` garbage collection locks during server initialization and automated test execution.
@@ -64,10 +66,12 @@ Upload lecture slides, textbooks, or research papers and automatically synthesiz
 4. 🎯 **Exam Cram & Cheatsheet**: Likely test questions, key definitions, essential formulas, and high-yield review notes.
 - **Interactive Study Tools**: Test your retention with auto-generated **Flashcard Decks** and **Practice Quizzes**.
 
-### 📄 Multi-Format Document Analysis & Vision OCR
-- **Broad File Support**: Native extraction and parsing for `.md`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.txt`, `.pdf`, and Images (`.png`, `.jpg`, `.jpeg`, `.webp`).
-- **Drag & Drop Workspace**: Intuitive visual drag-and-drop overlay with multi-file attachment pills, upload progress indicators, and instant file removal.
-- **Fallback OCR Engine**: Integrated Tesseract.js optical character recognition pipeline for extracting text from scanned lecture slides and image documents.
+### 📄 Multimodal AI Vision & Document Analysis
+- **ChatGPT-Like Multimodal Intelligence**: Powered by **Google Gemini 2.5 Flash Vision** for advanced image understanding (diagrams, flowcharts, graphs, tables, circuit schematics, and UI screenshots) while keeping **Groq (`llama-3.3-70b-versatile`)** as the primary high-speed chat and reasoning engine.
+- **Intelligent Document Classification**: Automatically classifies uploaded files into 10 specialized academic categories: *Question Paper*, *Notes*, *Resume*, *Invoice*, *Aadhaar*, *Circuit Diagram*, *Flowchart*, *Graph*, *Table*, or *General Image*.
+- **Strict OCR-Level Question Paper Extraction**: For exam papers, Gemini Vision executes strict layout parsing—preserving exact numbering, sub-questions, equations, mathematical notations, marks, tables, and symbols without summarizing or hallucinating.
+- **Dual Structured Output**: Extracts both clean Markdown formatting and structured JSON objects (`documentType`, `questions`, `metadata`) that feed directly into Groq for precise, diagram-aware reasoning.
+- **Broad File & Fallback OCR Support**: Native extraction and parsing for `.md`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.txt`, `.pdf`, and Images (`.png`, `.jpg`, `.jpeg`, `.webp`) with integrated Tesseract.js optical character recognition fallback.
 
 ### 📤 Multi-Format Export & Sharing
 Easily export your tutoring conversations or synthesized study notes in standard document formats:
@@ -91,13 +95,13 @@ Easily export your tutoring conversations or synthesized study notes in standard
 | :--- | :--- | :--- |
 | **Frontend** | React.js (Vite), Tailwind CSS | Fast client-side rendering with custom high-contrast dark theme tokens |
 | **Icons & UI** | Lucide React, Custom SVG Brand | Modern typography and sleek geometric black-and-white icon system |
-| **State & Routing** | React Router DOM, Context API | Global authentication state (`AuthContext`) and protected route guards |
+| **State & Routing** | React Router DOM, Context API | Global authentication state (`AuthContext`) with persistent token rotation |
 | **Markdown** | React Markdown, Remark GFM, Prism | Rich text parsing, tables, math, and code syntax highlighting |
-| **Backend** | Node.js, Express.js | Scalable RESTful API server with streaming response controllers |
+| **Backend** | Node.js, Express.js | Scalable RESTful API server with SSE streaming response controllers |
 | **Database** | MongoDB, Mongoose | Flexible document schemas for users, chats, messages, and file uploads |
-| **Authentication** | JWT, bcryptjs, Passport.js | Secure stateless authentication with Google OAuth social login |
-| **AI & OCR Engine** | Google Gemini API, Tesseract.js | Advanced LLM intelligence, PDF extraction, and optical character recognition |
-| **File Handling** | Multer, pdf-parse, mammoth | Multi-format multipart form handling and document text processing |
+| **Authentication** | JWT, bcryptjs, Passport.js | 30-day persistent stateless authentication with Google OAuth social login |
+| **AI & Vision Engine** | Groq API, Google Gemini Vision | Llama 3.3 70B reasoning & Gemini 2.5 Flash multimodal document parsing |
+| **File & OCR Pipeline** | Multer, pdf-parse, Tesseract.js | Multi-format form handling, PDF parsing, and optical character recognition |
 | **Quality & Tests** | ESLint 8, Jest, Supertest | Full React 18 linting and 100% automated API & notification test suites |
 
 ---
@@ -149,6 +153,7 @@ JWT_SECRET=your_super_secret_jwt_signing_key_here
 JWT_EXPIRE=30d
 
 # AI API Integration
+GROQ_API_KEY=your_groq_api_key_here
 GEMINI_API_KEY=your_google_gemini_api_key_here
 
 # Optional: Google OAuth Social Login (If using Google Sign-In)
@@ -169,9 +174,9 @@ CampusMind-AI/
 │   ├── middleware/          # JWT auth guard, rate limiters, Multer file uploaders
 │   ├── models/              # Mongoose database schemas (User, Chat, Upload, Question)
 │   ├── routes/              # Express API route endpoints
-│   ├── services/            # Google Gemini AI services & 4-tier notes synthesizer
+│   ├── services/            # Groq chat, Gemini Vision classification & 4-tier notes synthesizer
 │   ├── tests/               # Automated Jest integration suites (api.test.js, sendEmail.test.js)
-│   ├── utils/               # Multi-format Document Extractor & Tesseract.js OCR
+│   ├── utils/               # Structured File Extractor, Prompt Builder & Tesseract.js OCR
 │   └── server.js            # Express server entry point & database initialization
 │
 ├── frontend/

@@ -14,6 +14,7 @@ export default function OAuthCallbackPage() {
   useEffect(() => {
     const processOAuth = async () => {
       const token = searchParams.get('token');
+      const refreshToken = searchParams.get('refreshToken');
       const err = searchParams.get('error');
 
       if (err) {
@@ -24,7 +25,7 @@ export default function OAuthCallbackPage() {
       if (token) {
         try {
           setStatus('Verifying account details...');
-          await loginWithToken(token);
+          await loginWithToken(token, refreshToken);
           setStatus('Authentication successful! Redirecting...');
           setTimeout(() => {
             navigate('/');

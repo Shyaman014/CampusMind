@@ -72,15 +72,23 @@ API.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const storedRefreshToken = localStorage.getItem('campusmind_refresh_token');
         const refreshResponse = await axios.post(
           `${baseURL}/auth/refresh`,
-          {},
-          { withCredentials: true }
+          storedRefreshToken ? { refreshToken: storedRefreshToken } : {},
+          {
+            withCredentials: true,
+            headers: storedRefreshToken ? { 'x-refresh-token': storedRefreshToken } : {},
+          }
         );
 
         if (refreshResponse.data?.success && refreshResponse.data?.data?.token) {
           const newToken = refreshResponse.data.data.token;
+          const newRefreshToken = refreshResponse.data.data.refreshToken;
           localStorage.setItem('campusmind_token', newToken);
+          if (newRefreshToken) {
+            localStorage.setItem('campusmind_refresh_token', newRefreshToken);
+          }
           API.defaults.headers.common['Authorization'] = 'Bearer ' + newToken;
           originalRequest.headers['Authorization'] = 'Bearer ' + newToken;
           processQueue(null, newToken);
@@ -89,6 +97,7 @@ API.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         localStorage.removeItem('campusmind_token');
+        localStorage.removeItem('campusmind_refresh_token');
         localStorage.removeItem('campusmind_user');
         window.dispatchEvent(new Event('auth:unauthorized'));
         return Promise.reject(refreshError);

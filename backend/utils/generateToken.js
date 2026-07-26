@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const generateToken = (id, expiresIn = '15m') => {
+const generateToken = (id, expiresIn = '30d') => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'campusmind_super_secret_jwt_key_2026_production', {
     expiresIn,
   });
