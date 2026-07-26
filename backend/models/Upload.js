@@ -36,6 +36,10 @@ const UploadSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    visionText: {
+      type: String,
+      default: '',
+    },
     summary: {
       type: String,
       default: '',

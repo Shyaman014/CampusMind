@@ -1,6 +1,6 @@
 /**
  * Utility module for building structured prompts and managing conversation memory for AI analysis.
- * Ensures strict adherence to extracted text without hallucinating visual elements.
+ * Integrates Gemini Vision analysis and document extraction with Groq reasoning.
  */
 
 /**
@@ -16,7 +16,7 @@ const isImageAttachment = (fileType = '', fileName = '') => {
 };
 
 /**
- * Formats conversation history messages, enriching them with stored attachment OCR/PDF text.
+ * Formats conversation history messages, enriching them with stored Gemini Vision or document text.
  * Prevents context loss across multi-turn conversations.
  * @param {Array} messages - Array of message objects from MongoDB
  * @returns {Array} Formatted messages array { role, content } for LLM
@@ -26,11 +26,12 @@ const formatConversationHistory = (messages = []) => {
     let contentStr = m.content || '';
     if (m.attachments && m.attachments.length > 0) {
       const attSummary = m.attachments
-        .filter(a => a && (a.fileName || a.extractedText))
+        .filter(a => a && (a.fileName || a.extractedText || a.visionText))
         .map(a => {
           const isImg = isImageAttachment(a.fileType, a.fileName);
-          const typeLabel = isImg ? 'Image (OCR Text)' : `Document (${(a.fileType || 'file').toUpperCase()})`;
-          return `[Attached ${typeLabel}: "${a.fileName || 'unknown'}"]\nExtracted Content:\n${a.extractedText || 'No readable text available.'}`;
+          const typeLabel = isImg ? 'Image (Gemini Vision Analysis)' : `Document (${(a.fileType || 'file').toUpperCase()})`;
+          const content = a.extractedText || a.visionText || 'No readable text available.';
+          return `[Attached ${typeLabel}: "${a.fileName || 'unknown'}"]\nContent:\n${content}`;
         })
         .join('\n\n');
       if (attSummary) {
@@ -45,8 +46,8 @@ const formatConversationHistory = (messages = []) => {
 };
 
 /**
- * Builds the strict LLM prompt for chat messages, incorporating current or previous attachment context.
- * Enforces anti-hallucination rules for OCR text.
+ * Builds the LLM prompt for chat messages, incorporating current or previous Gemini Vision / document context.
+ * Enforces ChatGPT-like image reasoning using Gemini Vision output.
  * @param {string} message - User query
  * @param {Array} currentAttachments - Attachments uploaded in the current request
  * @param {Array} chatHistory - Previous messages in the chat session
@@ -68,16 +69,19 @@ const buildChatPrompt = (message = '', currentAttachments = [], chatHistory = []
   if (currentAttachments && currentAttachments.length > 0) {
     const hasImage = currentAttachments.some(att => isImageAttachment(att.fileType, att.fileName));
     const attachmentsContent = currentAttachments
-      .map(att => `--- Attachment (${att.fileType || 'file'}): ${att.fileName} ---\n${att.extractedText || 'No readable text found.'}\n--- End Attachment ---`)
+      .map(att => {
+        const content = att.extractedText || att.visionText || 'No readable content found.';
+        return `--- Attachment (${att.fileType || 'file'}): ${att.fileName} ---\n${content}\n--- End Attachment ---`;
+      })
       .join('\n\n');
 
-    const userQ = message && message.trim() ? `User Question:\n"${message.trim()}"\n\n` : '';
-
     if (hasImage) {
-      logs.promptType = 'current_image_ocr';
-      promptText = `${userQ}The following text was extracted from an uploaded image using OCR.\n\nOCR Content:\n${attachmentsContent}\n\nOnly answer using this extracted text.\nIf the OCR text is incomplete, clearly state that some visual information cannot be interpreted from OCR alone.`;
+      logs.promptType = 'current_image_vision';
+      const userQ = message && message.trim() ? message.trim() : 'Please analyze and explain this image.';
+      promptText = `User uploaded an image.\n\nGemini Vision Analysis:\n${attachmentsContent}\n\nUser Question:\n${userQ}\n\nInstructions:\nUse the above Gemini Vision Analysis to answer the user's question in detail. Continue reasoning clearly and accurately as an expert AI tutor.`;
     } else {
       logs.promptType = 'current_document_text';
+      const userQ = message && message.trim() ? `User Question:\n"${message.trim()}"\n\n` : '';
       promptText = `${userQ}The following text was extracted from an uploaded document (${currentAttachments.map(a => a.fileType || 'file').join(', ')}).\n\nDocument Content:\n${attachmentsContent}\n\nOnly answer using this extracted text. Do not invent or assume contents not present in the extracted text.`;
     }
   }
@@ -87,11 +91,12 @@ const buildChatPrompt = (message = '', currentAttachments = [], chatHistory = []
     for (const m of chatHistory) {
       if (m.attachments && m.attachments.length > 0) {
         for (const att of m.attachments) {
-          if (att && att.extractedText && typeof att.extractedText === 'string' && att.extractedText.trim() !== '' && !att.extractedText.startsWith('[')) {
+          const textContent = att.extractedText || att.visionText || '';
+          if (textContent && typeof textContent === 'string' && textContent.trim() !== '' && !textContent.startsWith('[')) {
             const isImg = isImageAttachment(att.fileType, att.fileName);
             pastAttachmentsList.push({
               isImage: isImg,
-              text: `[Previously Attached ${isImg ? 'Image (OCR Content)' : 'Document (' + (att.fileType || 'file').toUpperCase() + ' Content)'} in message "${m.content ? m.content.slice(0, 30) : 'upload'}": "${att.fileName}"]\nContent:\n${att.extractedText.trim()}`
+              text: `[Previously Attached ${isImg ? 'Image (Gemini Vision Analysis)' : 'Document (' + (att.fileType || 'file').toUpperCase() + ' Content)'} in message "${m.content ? m.content.slice(0, 30) : 'upload'}": "${att.fileName}"]\nContent:\n${textContent.trim()}`
             });
           }
         }
@@ -103,13 +108,14 @@ const buildChatPrompt = (message = '', currentAttachments = [], chatHistory = []
       logs.previousAttachmentsCount = pastAttachmentsList.length;
       const hasPrevImage = pastAttachmentsList.some(item => item.isImage);
       const pastContextStr = pastAttachmentsList.map(item => item.text).join('\n\n--- Next Previous Attachment ---\n\n');
-      const userQ = message && message.trim() ? `User Follow-up Question:\n"${message.trim()}"\n\n` : '';
 
       if (hasPrevImage) {
-        logs.promptType = 'followup_image_ocr';
-        promptText = `${userQ}Active Conversation Context (Previously Extracted Text from Uploaded Files):\n${pastContextStr}\n\nInstructions:\nThe following text was extracted from a previously uploaded image/document using OCR/extraction. Only answer using this extracted text. If the OCR text is incomplete, clearly state that some visual information cannot be interpreted from OCR alone. Do not ask the user to re-upload the file.`;
+        logs.promptType = 'followup_image_vision';
+        const userQ = message && message.trim() ? message.trim() : 'Please continue analyzing the image.';
+        promptText = `User uploaded an image previously.\n\nActive Conversation Context (Previously Uploaded Image / Document Analysis):\n${pastContextStr}\n\nUser Follow-up Question:\n${userQ}\n\nInstructions:\nAnswer the user's follow-up question using the stored Gemini Vision description / document extraction above without asking them to re-upload the image or document. Continue reasoning clearly and accurately.`;
       } else {
         logs.promptType = 'followup_document_text';
+        const userQ = message && message.trim() ? `User Follow-up Question:\n"${message.trim()}"\n\n` : '';
         promptText = `${userQ}Active Conversation Context (Previously Extracted Text from Uploaded Documents):\n${pastContextStr}\n\nInstructions:\nAnswer the user's follow-up question using the active conversation context and previously extracted document content above. Do not invent contents not present in the extracted text, and do not ask the user to re-upload the file.`;
       }
     }

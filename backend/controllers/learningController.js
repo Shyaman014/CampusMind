@@ -27,7 +27,8 @@ exports.uploadMaterial = async (req, res) => {
         fileName: req.file.originalname, 
         fileUrl, 
         fileType, 
-        mimetype: req.file.mimetype 
+        mimetype: req.file.mimetype,
+        userPrompt: req.body.prompt || req.body.message || ''
       });
     } catch (err) {
       console.error('[Backend Upload Error - Text Extraction]:', err.message);
@@ -45,6 +46,7 @@ exports.uploadMaterial = async (req, res) => {
       fileUrl,
       fileType,
       extractedText: extractedText || '',
+      visionText: fileType === 'image' ? (extractedText || '') : '',
       summary: aiAnalysis.summary,
       importantPoints: aiAnalysis.importantPoints,
       flashcards: aiAnalysis.flashcards,
@@ -54,6 +56,7 @@ exports.uploadMaterial = async (req, res) => {
 
     const responseData = upload.toObject ? upload.toObject() : { ...upload._doc };
     responseData.extractedText = extractedText;
+    responseData.visionText = fileType === 'image' ? (extractedText || '') : '';
 
     return successResponse(res, 201, 'File uploaded and AI analysis complete', responseData);
   } catch (error) {

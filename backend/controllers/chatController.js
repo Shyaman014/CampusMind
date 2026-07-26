@@ -187,15 +187,21 @@ const streamChatMessage = async (req, res, next) => {
       for (const att of attachments) {
         try {
           const fileType = detectFileType(att.fileName, att.fileType);
-          let text = att.extractedText;
+          let text = att.extractedText || att.visionText;
           if (!text || typeof text !== 'string' || text.trim().length < 5 || text.startsWith('[') || text.startsWith('Document "')) {
-            text = await extractTextFromAttachment({ ...att, fileType });
+            text = await extractTextFromAttachment({ ...att, fileType, userPrompt: message });
           }
           if (!text || text.trim() === '') {
             throw new Error(`No readable text could be extracted from "${att.fileName}".`);
           }
           console.log(`[chatController] Attachment Processed: "${att.fileName}" | Type: "${fileType}" | Extracted Length: ${text.trim().length}`);
-          enrichedAttachments.push({ ...att, fileType, extractedText: text.trim() });
+          const isImg = fileType === 'image';
+          enrichedAttachments.push({
+            ...att,
+            fileType,
+            extractedText: text.trim(),
+            visionText: isImg ? text.trim() : (att.visionText || ''),
+          });
         } catch (error) {
           console.error(`[Backend Chat Streaming Error - Extraction]:`, error.message);
           return res.status(400).json({ success: false, message: error.message || 'File extraction failed.' });

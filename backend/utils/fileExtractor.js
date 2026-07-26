@@ -62,9 +62,9 @@ const preprocessImageForOcr = async (filePath) => {
 };
 
 /**
- * Extracts text from a local file attachment.
- * @param {Object} attachment - The attachment object containing { fileName, fileUrl, fileType, mimetype }
- * @returns {Promise<string>} The extracted text
+ * Extracts text from a local file attachment. Uses Gemini Vision for images with OCR fallback.
+ * @param {Object} attachment - The attachment object containing { fileName, fileUrl, fileType, mimetype, userPrompt }
+ * @returns {Promise<string>} The extracted text or vision description
  */
 const extractTextFromAttachment = async (attachment) => {
   try {
@@ -158,9 +158,22 @@ const extractTextFromAttachment = async (attachment) => {
       }
     }
 
-    // Images (OCR with enhancement preprocessing)
+    // Images (Gemini Vision with OCR fallback)
     if (fileType === 'image') {
       try {
+        const { analyzeImage } = require('../services/visionService');
+        const visionDescription = await analyzeImage(filePath, attachment.userPrompt || '');
+        if (visionDescription && visionDescription.trim().length >= 10) {
+          console.log(`[fileExtractor] Image successfully analyzed by Gemini Vision | Filename: "${filename}" | Char Count: ${visionDescription.length}`);
+          return visionDescription.trim();
+        }
+      } catch (visionErr) {
+        console.warn(`[fileExtractor] Gemini Vision failed for "${filename}", falling back to OCR pipeline:`, visionErr.message);
+      }
+
+      // Fallback: OCR with enhancement preprocessing
+      try {
+        console.log(`[fileExtractor] Running OCR fallback for "${filename}"...`);
         const processedInput = await preprocessImageForOcr(filePath);
         const Tesseract = require('tesseract.js');
         const { data } = await Tesseract.recognize(processedInput, 'eng');
