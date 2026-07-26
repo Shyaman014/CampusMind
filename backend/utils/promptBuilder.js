@@ -1,6 +1,6 @@
 /**
  * Utility module for building structured prompts and managing conversation memory for AI analysis.
- * Integrates Gemini Vision analysis and document extraction with Groq reasoning.
+ * Integrates Gemini Vision OCR & Document Parsing with Groq Professor & Reasoning Engine.
  */
 
 /**
@@ -16,7 +16,7 @@ const isImageAttachment = (fileType = '', fileName = '') => {
 };
 
 /**
- * Formats conversation history messages, enriching them with stored Gemini Vision or document text.
+ * Formats conversation history messages, enriching them with stored Gemini Vision extraction or document text.
  * Prevents context loss across multi-turn conversations.
  * @param {Array} messages - Array of message objects from MongoDB
  * @returns {Array} Formatted messages array { role, content } for LLM
@@ -26,11 +26,11 @@ const formatConversationHistory = (messages = []) => {
     let contentStr = m.content || '';
     if (m.attachments && m.attachments.length > 0) {
       const attSummary = m.attachments
-        .filter(a => a && (a.fileName || a.extractedText || a.visionText))
+        .filter(a => a && (a.fileName || a.extractedText || a.visionText || a.parsedContent))
         .map(a => {
           const isImg = isImageAttachment(a.fileType, a.fileName);
-          const typeLabel = isImg ? 'Image (Gemini Vision Analysis)' : `Document (${(a.fileType || 'file').toUpperCase()})`;
-          const content = a.extractedText || a.visionText || 'No readable text available.';
+          const typeLabel = isImg ? 'Image (Gemini Vision Extraction)' : `Document (${(a.fileType || 'file').toUpperCase()})`;
+          const content = a.extractedText || a.visionText || a.parsedContent || 'No readable text available.';
           return `[Attached ${typeLabel}: "${a.fileName || 'unknown'}"]\nContent:\n${content}`;
         })
         .join('\n\n');
@@ -47,7 +47,7 @@ const formatConversationHistory = (messages = []) => {
 
 /**
  * Builds the LLM prompt for chat messages, incorporating current or previous Gemini Vision / document context.
- * Enforces ChatGPT-like image reasoning using Gemini Vision output.
+ * Enforces Groq Professor + Reasoning Engine behavior on structured extractions.
  * @param {string} message - User query
  * @param {Array} currentAttachments - Attachments uploaded in the current request
  * @param {Array} chatHistory - Previous messages in the chat session
@@ -70,15 +70,31 @@ const buildChatPrompt = (message = '', currentAttachments = [], chatHistory = []
     const hasImage = currentAttachments.some(att => isImageAttachment(att.fileType, att.fileName));
     const attachmentsContent = currentAttachments
       .map(att => {
-        const content = att.extractedText || att.visionText || 'No readable content found.';
+        const content = att.extractedText || att.visionText || att.parsedContent || 'No readable content found.';
         return `--- Attachment (${att.fileType || 'file'}): ${att.fileName} ---\n${content}\n--- End Attachment ---`;
       })
       .join('\n\n');
 
     if (hasImage) {
       logs.promptType = 'current_image_vision';
-      const userQ = message && message.trim() ? message.trim() : 'Please analyze and explain this image.';
-      promptText = `User uploaded an image.\n\nGemini Vision Analysis:\n${attachmentsContent}\n\nUser Question:\n${userQ}\n\nInstructions:\nUse the above Gemini Vision Analysis to answer the user's question in detail. Continue reasoning clearly and accurately as an expert AI tutor.`;
+      const userQ = message && message.trim() ? `\n\nUser Question/Instruction:\n"${message.trim()}"` : '';
+      promptText = `You are an expert university professor and senior academic evaluator.
+The following exam paper, questions, or diagram has already been extracted from an uploaded image.
+Solve every question completely.
+
+Extracted Image Content (Structured Markdown):
+${attachmentsContent}${userQ}
+
+Rules:
+- Preserve exact question numbering and sub-parts.
+- Do not skip any questions or sub-questions; answer every sub-question separately.
+- Show all mathematical steps, formulas, and calculations clearly.
+- Draw ASCII diagrams or flowcharts where possible to illustrate concepts.
+- If a diagram description exists in the extracted text, use it to explain or solve the problem.
+- If part of the question or text is marked [UNCLEAR], tell the user exactly which part is unreadable and solve whatever is clearly legible.
+- Never invent missing information or guess unreadable numbers/symbols.
+- Format your response to be exam-ready, structured, easy to read, and use bullet points where appropriate.
+- Avoid unnecessary programming code unless explicitly asked, and avoid generic filler text.`;
     } else {
       logs.promptType = 'current_document_text';
       const userQ = message && message.trim() ? `User Question:\n"${message.trim()}"\n\n` : '';
@@ -91,12 +107,12 @@ const buildChatPrompt = (message = '', currentAttachments = [], chatHistory = []
     for (const m of chatHistory) {
       if (m.attachments && m.attachments.length > 0) {
         for (const att of m.attachments) {
-          const textContent = att.extractedText || att.visionText || '';
+          const textContent = att.extractedText || att.visionText || att.parsedContent || '';
           if (textContent && typeof textContent === 'string' && textContent.trim() !== '' && !textContent.startsWith('[')) {
             const isImg = isImageAttachment(att.fileType, att.fileName);
             pastAttachmentsList.push({
               isImage: isImg,
-              text: `[Previously Attached ${isImg ? 'Image (Gemini Vision Analysis)' : 'Document (' + (att.fileType || 'file').toUpperCase() + ' Content)'} in message "${m.content ? m.content.slice(0, 30) : 'upload'}": "${att.fileName}"]\nContent:\n${textContent.trim()}`
+              text: `[Previously Attached ${isImg ? 'Image (Gemini Vision Extraction)' : 'Document (' + (att.fileType || 'file').toUpperCase() + ' Content)'} in message "${m.content ? m.content.slice(0, 30) : 'upload'}": "${att.fileName}"]\nContent:\n${textContent.trim()}`
             });
           }
         }
@@ -111,8 +127,25 @@ const buildChatPrompt = (message = '', currentAttachments = [], chatHistory = []
 
       if (hasPrevImage) {
         logs.promptType = 'followup_image_vision';
-        const userQ = message && message.trim() ? message.trim() : 'Please continue analyzing the image.';
-        promptText = `User uploaded an image previously.\n\nActive Conversation Context (Previously Uploaded Image / Document Analysis):\n${pastContextStr}\n\nUser Follow-up Question:\n${userQ}\n\nInstructions:\nAnswer the user's follow-up question using the stored Gemini Vision description / document extraction above without asking them to re-upload the image or document. Continue reasoning clearly and accurately.`;
+        const userQ = message && message.trim() ? message.trim() : 'Please continue solving or explaining.';
+        promptText = `You are an expert university professor and senior academic evaluator.
+An exam paper or image was previously uploaded by the user, and its exact content was extracted into structured Markdown.
+
+Active Conversation Context (Previously Extracted Image/Document Content):
+${pastContextStr}
+
+User Follow-up Question/Instruction:
+"${userQ}"
+
+Instructions:
+Answer the user's follow-up question using the stored image extraction/document content above without asking them to re-upload the image or file.
+Rules:
+- Maintain exam-ready, structured, and easy-to-read formatting with bullet points and clear headings.
+- Show calculations and draw ASCII diagrams where possible.
+- If referencing a diagram description from the extraction, explain it clearly.
+- If referencing text marked [UNCLEAR], remind the user which part was unreadable.
+- Never invent missing information or hallucinate contents not present in the extraction.
+- Answer every sub-question separately and avoid unnecessary programming code unless asked.`;
       } else {
         logs.promptType = 'followup_document_text';
         const userQ = message && message.trim() ? `User Follow-up Question:\n"${message.trim()}"\n\n` : '';

@@ -201,6 +201,7 @@ const streamChatMessage = async (req, res, next) => {
             fileType,
             extractedText: text.trim(),
             visionText: isImg ? text.trim() : (att.visionText || ''),
+            parsedContent: isImg ? text.trim() : (att.parsedContent || ''),
           });
         } catch (error) {
           console.error(`[Backend Chat Streaming Error - Extraction]:`, error.message);

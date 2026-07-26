@@ -47,6 +47,7 @@ exports.uploadMaterial = async (req, res) => {
       fileType,
       extractedText: extractedText || '',
       visionText: fileType === 'image' ? (extractedText || '') : '',
+      parsedContent: fileType === 'image' ? (extractedText || '') : '',
       summary: aiAnalysis.summary,
       importantPoints: aiAnalysis.importantPoints,
       flashcards: aiAnalysis.flashcards,
@@ -57,6 +58,7 @@ exports.uploadMaterial = async (req, res) => {
     const responseData = upload.toObject ? upload.toObject() : { ...upload._doc };
     responseData.extractedText = extractedText;
     responseData.visionText = fileType === 'image' ? (extractedText || '') : '';
+    responseData.parsedContent = fileType === 'image' ? (extractedText || '') : '';
 
     return successResponse(res, 201, 'File uploaded and AI analysis complete', responseData);
   } catch (error) {

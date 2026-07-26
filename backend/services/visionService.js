@@ -4,7 +4,7 @@ const { GoogleGenAI } = require('@google/genai');
 
 /**
  * Service for analyzing image files using official @google/genai SDK with gemini-2.5-flash model.
- * Provides ChatGPT-like image understanding for diagrams, flowcharts, screenshots, handwriting, etc.
+ * Acts STRICTLY as an OCR and Document Parser engine. Never solves or answers questions directly.
  */
 
 const getMimeType = (filePath) => {
@@ -22,10 +22,10 @@ const getMimeType = (filePath) => {
 };
 
 /**
- * Analyzes an image file using Gemini 2.5 Flash and returns a detailed plain text description.
+ * Analyzes an image file using Gemini 2.5 Flash as an OCR + Document Parser to extract structured Markdown.
  * @param {string} filePath - Absolute path to the image file
- * @param {string} [userPrompt=''] - Optional user prompt to guide the analysis
- * @returns {Promise<string>} Plain text description of the image
+ * @param {string} [userPrompt=''] - Optional user prompt (ignored for solving; used only as extraction context)
+ * @returns {Promise<string>} Structured Markdown extraction of the image
  */
 const analyzeImage = async (filePath, userPrompt = '') => {
   try {
@@ -38,17 +38,29 @@ const analyzeImage = async (filePath, userPrompt = '') => {
     }
 
     const filename = path.basename(filePath);
-    console.log(`[visionService] Starting Gemini Vision analysis for file: "${filename}"${userPrompt ? ' with prompt: "' + userPrompt.slice(0, 50) + '..."' : ''}`);
+    console.log(`[visionService] Starting Gemini Vision OCR & Document Parsing for file: "${filename}"`);
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const imageBuffer = fs.readFileSync(filePath);
     const base64Image = imageBuffer.toString('base64');
     const mimeType = getMimeType(filePath);
 
-    const defaultPrompt = 'Please provide a comprehensive, highly detailed description of this image. Extract and explain all text, diagrams, figures, charts, flowcharts, UI screenshots, graphs, tables, or handwritten notes present.';
+    const systemInstruction = `You are a precision OCR and Document Parser engine. Your ONLY responsibility is extracting text, equations, tables, and structural visual descriptions from the uploaded image into structured Markdown.
+CRITICAL MANDATES:
+1. NEVER answer questions, NEVER explain theory, NEVER solve numericals, NEVER solve diagrams, and NEVER summarize content.
+2. Extract every visible heading, instruction, question, and text exactly as written, preserving exact question numbering, sub-parts, marks, question order, equations, mathematical expressions, symbols, and formatting.
+3. For tables, represent them accurately using Markdown table syntax.
+4. For diagrams, charts, graphs, figures, or screenshots, do NOT attempt to solve or interpret their meaning. Instead, provide a detailed structural physical description formatted exactly like:
+Diagram Description:
+- [component or visual element 1]
+- [component or visual element 2]
+- [connections, labels, or layout]
+5. If any word, symbol, number, or section cannot be read clearly due to blur, low contrast, or cropping, write exactly: [UNCLEAR]. NEVER guess, NEVER infer, and NEVER complete missing text.
+Return ONLY the structured Markdown extraction without introductory or concluding remarks.`;
+
     const promptText = userPrompt && userPrompt.trim()
-      ? `Please analyze this image in detail and describe all visual elements, diagrams, charts, text, or figures. Specifically address this request in your explanation:\n"${userPrompt.trim()}"`
-      : defaultPrompt;
+      ? `${systemInstruction}\n\nNote on User Interest: The user mentioned "${userPrompt.trim()}". Remember: Do NOT answer or solve this! Perform ONLY exact structural OCR extraction and diagram description as instructed above.`
+      : systemInstruction;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -63,15 +75,15 @@ const analyzeImage = async (filePath, userPrompt = '') => {
       ],
     });
 
-    const description = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!description || description.trim().length === 0) {
-      throw new Error('Gemini Vision returned an empty description.');
+    const extraction = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!extraction || extraction.trim().length === 0) {
+      throw new Error('Gemini Vision returned an empty extraction.');
     }
 
-    console.log(`[visionService] Gemini Vision analysis successful for "${filename}". Extracted char count: ${description.trim().length}`);
-    return description.trim();
+    console.log(`[visionService] Gemini Vision extraction successful for "${filename}". Extracted char count: ${extraction.trim().length}`);
+    return extraction.trim();
   } catch (error) {
-    console.error(`[visionService Error] Failed to analyze image "${path.basename(filePath || '')}":`, error.message);
+    console.error(`[visionService Error] Failed to extract image "${path.basename(filePath || '')}":`, error.message);
     throw error;
   }
 };

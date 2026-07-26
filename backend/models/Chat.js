@@ -17,6 +17,7 @@ const messageSchema = new mongoose.Schema({
       fileType: String,
       extractedText: String,
       visionText: String,
+      parsedContent: String,
     },
   ],
   feedback: {
